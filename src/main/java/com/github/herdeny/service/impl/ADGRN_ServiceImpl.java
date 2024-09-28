@@ -1,6 +1,7 @@
 package com.github.herdeny.service.impl;
 
 import com.github.herdeny.service.ADGRN_Service;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -11,16 +12,23 @@ import java.nio.charset.StandardCharsets;
 @Service
 public class ADGRN_ServiceImpl implements ADGRN_Service {
 
-    String pythonPath = "D:\\ProgramData\\anaconda3\\envs\\AD-GRN\\python.exe";
-    String pyScenicPath = "D:\\ProgramData\\anaconda3\\envs\\AD-GRN\\Scripts\\pyscenic.exe";
+    @Value("${PYTHON_PATH}")
+    String pythonPath;
+
+    @Value("${PYSCENIC_PATH}")
+    String pyScenicPath;
+
+    @Value("${AD_GRN_PATH}")
+    String AD_GRN_PATH;
+
+    @Value("${CREATE_IMG_PATH}")
+    String CREATE_IMG_PATH;
 
     @Override
     public String adgrn_createLoom(String filePath) {
         System.out.println("Start Generate Loom");
 
-        String pyPath = "D:\\ACM\\HealthAI\\AD-GRN.py";
-
-        String[] args1 = new String[]{pythonPath, pyPath, filePath};
+        String[] args1 = new String[]{pythonPath, AD_GRN_PATH, filePath};
 
         try {
             Process process = Runtime.getRuntime().exec(args1);
@@ -52,9 +60,7 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
     public void adgrn_createImg(String filePath) {
         System.out.println("Start Generate Image");
 
-        String pyPath = "D:\\ACM\\HealthAI\\createImg.py";
-
-        String[] args1 = new String[]{pythonPath, pyPath, filePath};
+        String[] args1 = new String[]{pythonPath, CREATE_IMG_PATH, filePath};
 
         try {
             Process process = Runtime.getRuntime().exec(args1);

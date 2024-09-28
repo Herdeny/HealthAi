@@ -26,7 +26,7 @@ public class ADGRN_Controller {
         String loom_filePath = adgrnService.adgrn_createLoom(filePath);
         adgrnService.adgrn_createTSV(loom_filePath);
         adgrnService.adgrn_createImg("adj.tsv");
-        return Result.success(loom_filePath);
+        return Result.success("data/GRN.png");
     }
 
     @PostMapping("/loom")
