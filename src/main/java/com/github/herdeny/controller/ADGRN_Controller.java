@@ -1,9 +1,11 @@
 package com.github.herdeny.controller;
 
+import com.github.herdeny.pojo.Query;
 import com.github.herdeny.pojo.Result;
 import com.github.herdeny.service.ADGRN_Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,12 +18,14 @@ public class ADGRN_Controller {
     System.Logger logger = System.getLogger(ADGRN_Controller.class.getName());
 
     @PostMapping("/test")
-    public Result Test() {
+    public Result Test(@RequestBody Query query) {
+        String data = query.getData();
         logger.log(System.Logger.Level.INFO, "Test");
-        return Result.success();
+        return Result.success(data);
     }
     @PostMapping("/run")
-    public Result run(String filePath) {
+    public Result run(@RequestBody Query query /*String filePath*/) {
+        String filePath = query.getData();
         //filePath = "D://ACM//HealthAI//ACT_377_4830.csv";
         String loom_filePath = adgrnService.adgrn_createLoom(filePath);
         adgrnService.adgrn_createTSV(loom_filePath);

@@ -6,7 +6,7 @@ import networkx as nx
 
 file_path = sys.argv[1]
 grn_data = pd.read_csv(file_path, sep='\t')
-grn_data = grn_data.iloc[:300, :3]
+grn_data = grn_data.iloc[:250, :3]
 
 nodecolor = ['#F63B42', '#FB0909', '#F82C24', '#F94536', '#FE4026', '#FD3914', '#F33E11', '#F34813', '#F54C0B',
              '#F85509', '#FD5C02', '#FA7D2A', '#F47A1C',
@@ -86,4 +86,6 @@ nx.draw(G, pos, node_size=node_sizes, node_color=node_color_values, edge_color=w
 #
 # # 使用 nx.draw_networkx_nodes 绘制节点
 # nx.draw_networkx_nodes(G, pos, node_size=node_sizes, node_color=node_color_values)
-plt.savefig("/data/GRN.png", format="PNG", dpi=250, bbox_inches='tight', pad_inches=0)
+
+# D:/filetest/2024_challCup/proData/GRN.png
+plt.savefig("D:/filetest/2024_challCup/proData/GRN.png", format="PNG", dpi=250, bbox_inches='tight', pad_inches=0)
