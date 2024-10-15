@@ -24,9 +24,18 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
     @Value("${CREATE_IMG_PATH}")
     String CREATE_IMG_PATH;
 
+    @Value("${hg38}")
+    String hg38_PATH;
+
+    @Value("${hs_hgnc_tfs}")
+    String hs_hgnc_tfs_PATH;
+
+    @Value("${motifs_PATH}")
+    String motifs_PATH;
+
     @Override
     public String adgrn_createLoom(String filePath) {
-        System.out.println("Start Generate Loom");
+        System.out.println("Start Generate Loom...");
 
         String[] args1 = new String[]{pythonPath, AD_GRN_PATH, filePath};
 
@@ -58,7 +67,7 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
 
     @Override
     public void adgrn_createImg(String filePath) {
-        System.out.println("Start Generate Image");
+        System.out.println("Start Generate Image...");
 
         String[] args1 = new String[]{pythonPath, CREATE_IMG_PATH, filePath};
 
@@ -87,7 +96,7 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
     }
 
     public int adgrn_createTSV(String filePath) {
-        System.out.println("Start Generate TSV");
+        System.out.println("Start Generate TSV...");
         try {
             // Build the command
             ProcessBuilder processBuilder = new ProcessBuilder(
@@ -95,7 +104,7 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
                     "--num_workers", "5",
                     "--output", "adj.tsv",
                     "--method", "grnboost2",
-                    filePath, "hs_hgnc_tfs.txt"
+                    filePath, hs_hgnc_tfs_PATH
             );
 
             processBuilder.redirectErrorStream(true);

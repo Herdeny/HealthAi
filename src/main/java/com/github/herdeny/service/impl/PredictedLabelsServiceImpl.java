@@ -21,25 +21,25 @@ import java.nio.charset.StandardCharsets;
 @Service
 public class PredictedLabelsServiceImpl implements PredictedLabelsService {
 
-    @Value("F://Software//develop_tools//Anaconda//envs//py38//python.exe")
+    @Value("${PYTHON_PATH}")
     String pythonPath;
 
-    @Value("src/main/java/com/github/herdeny/python/GeneAnalysis.py")
+    @Value("${GeneAnalysisPath}")
     String GeneAnalysisPath;
 
-    @Value("final_spatial_fusion.csv")
+    @Value("${final_spatial_fusion}")
     String final_spatial_fusion;
 
-    @Value("label_mapping.csv")
+    @Value("${label_mapping}")
     String label_mapping;
 
-    @Value("best_model_tempro-spatialfusion_Braak.h5")
+    @Value("${Braak.h5}")
     String best_model_tempro_spatialfusion_Braak;
 
-    @Value("best_model_tempro-spatialfusion_CERAD.h5")
+    @Value("${CERAD.h5}")
     String best_model_tempro_spatialfusion_CERAD;
 
-    @Value("best_model_tempro-spatialfusion_Cogdx.h5")
+    @Value("${Cogdx.h5}")
     String best_model_tempro_spatialfusion_Cogdx;
 
     /**
@@ -57,29 +57,61 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
                 best_model_tempro_spatialfusion_Cogdx
         };
 
+        Process process = null;
+        StringBuilder outputBuilder = new StringBuilder(); // 用于存储Python输出结果
         try {
-            Process process = Runtime.getRuntime().exec(args1);
+            process = Runtime.getRuntime().exec(args1);
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
-            BufferedReader err = new BufferedReader(new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8));
+            // 创建两个线程分别处理标准输出和错误输出
+            Process finalProcess = process;
+            Thread outputThread = new Thread(() -> {
+                try (BufferedReader in = new BufferedReader(new InputStreamReader(finalProcess.getInputStream(), StandardCharsets.UTF_8))) {
+                    String line;
+                    while ((line = in.readLine()) != null) {
+                        System.out.println(line);
+                        outputBuilder.append(line);
+                    }
+                } catch (IOException e) {
+                    System.err.println("Error reading process output: " + e.getMessage());
+                }
+            });
 
-            String actionStr;
-            if ((actionStr = in.readLine()) != null) {
+            Process finalProcess1 = process;
+            Thread errorThread = new Thread(() -> {
+                try (BufferedReader err = new BufferedReader(new InputStreamReader(finalProcess1.getErrorStream(), StandardCharsets.UTF_8))) {
+                    String errorStr;
+                    while ((errorStr = err.readLine()) != null) {
+                        System.err.println(errorStr);
+                    }
+                } catch (IOException e) {
+                    System.err.println("Error reading process error output: " + e.getMessage());
+                }
+            });
+
+            outputThread.start();
+            errorThread.start();
+
+            // 等待进程完成并确保输出线程正常结束
+            int exitCode = process.waitFor();
+            outputThread.join();
+            errorThread.join();
+
+            if (exitCode == 0) {
                 System.out.println("Completed Predicting pathological stages");
-                return actionStr;
+                return outputBuilder.toString();
+            } else {
+                System.err.println("Process exited with code: " + exitCode);
+                // 可以根据需要返回不同的结果或抛出异常
+                return null;
             }
 
-            String errorStr;
-            while ((errorStr = err.readLine()) != null) {
-                System.err.println(errorStr);
-            }
-
-            in.close();
-            err.close();
-            process.waitFor();
         } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error during prediction: " + e.getMessage(), e);
+        } finally {
+            if (process != null) {
+                process.destroy(); // 确保清理进程
+            }
         }
-        return null;
     }
+
 }

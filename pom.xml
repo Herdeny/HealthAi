@@ -57,6 +57,9 @@
 		</dependency>
 	</dependencies>
 
+	<!--打包方式为war包-->
+	<packaging>war</packaging>
+
 	<build>
 		<plugins>
 			<plugin>
