@@ -29,10 +29,13 @@ public class PredictedLabelsController {
     @Resource
     private PredictedLabelsService predictedLabelsService;
 
+    private static final String DIRECTORY = "/path/on/server/data/";
+
     System.Logger logger = System.getLogger(PredictedLabelsController.class.getName());
 
     @PostMapping("/run")
-    public Result run(@RequestParam String filePath) {
+    public Result run(@RequestParam String fileName) {
+        String filePath = DIRECTORY + fileName;
         String result = predictedLabelsService.predict(filePath);
         return Result.success("It is predicted that the patient is currently in the disease stage"+result);
     }

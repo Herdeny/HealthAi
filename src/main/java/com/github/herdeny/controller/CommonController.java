@@ -20,7 +20,7 @@ import java.io.File;
 @RestController
 public class CommonController {
 
-    private static final String DIRECTORY = "./data/";
+    private static final String DIRECTORY = "/path/on/server/data/";
 
     @PostMapping("/upload")
     public Result<String> uploadFile(@RequestParam("file") MultipartFile file){
@@ -31,7 +31,7 @@ public class CommonController {
         //检查目标文件夹是否存在，如果目标文件夹不存在，则创建
         File directory = new File(DIRECTORY);
         if(!directory.exists()){
-            directory.mkdir();
+            directory.mkdirs();
         }
         //保存文件
         try {
