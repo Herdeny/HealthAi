@@ -1,12 +1,19 @@
 package com.github.herdeny.controller;
 
 import com.github.herdeny.pojo.Result;
+import com.github.herdeny.utils.StringTools;
+import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * ClassName: CommonController
@@ -21,6 +28,9 @@ import java.io.File;
 public class CommonController {
 
     private static final String DIRECTORY = "/path/on/server/data/";
+
+    private static final Logger logger = LoggerFactory.getLogger(CommonController.class);
+
 
     @PostMapping("/upload")
     public Result<String> uploadFile(@RequestParam("file") MultipartFile file){
@@ -41,6 +51,56 @@ public class CommonController {
         }catch (Exception e){
             e.printStackTrace();
             return Result.error("上传文件时出现问题：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 将指定文件的内容读取并写入到HTTP响应中
+     * @param response
+     * @param filePath
+     */
+    protected void readFile(HttpServletResponse response, String filePath) {
+        if (!StringTools.pathIsOk(filePath)) {
+            return;
+        }
+        OutputStream out = null;
+        // 用于读取文件
+        FileInputStream in = null;
+        try {
+            File file = new File(filePath);
+            if (!file.exists()) {
+                return;
+            }
+            // TODO: 读取文件
+            in = new FileInputStream(file);
+            byte[] byteData = new byte[1024];
+            // 获取 HttpServletResponse 的输出流 out，用于将文件内容写入响应
+            out = response.getOutputStream();
+            int len = 0;
+            // while循环读取文件内容，每次读取 1024 字节
+            while ((len = in.read(byteData)) != -1) {
+                // 将读取的数据写入输出流 out
+                out.write(byteData, 0, len);
+            }
+            // 通过 out.flush() 刷新输出流，确保数据被发送
+            out.flush();
+        } catch (Exception e) {
+            logger.error("读取文件异常", e);
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    logger.error("IO异常", e);
+                }
+            }
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    logger.error("IO异常", e);
+                }
+            }
         }
     }
 }
