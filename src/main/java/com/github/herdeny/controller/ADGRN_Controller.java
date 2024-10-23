@@ -69,7 +69,7 @@ public class ADGRN_Controller extends CommonController{
     @GetMapping("/getGRN")
     public void getAvatar(HttpServletResponse response) {
         String GRNFolderPath = DIRECTORY + "GRN.png";
-        // 判断用户头像是否存在，如果不存在就使用默认头像
+        // 判断GRN路径是否存在
         while (!new File(GRNFolderPath).exists()) {
             return;
         }
