@@ -26,10 +26,12 @@ import java.util.concurrent.Executors;
 @RestController
 @RequestMapping("/prediction")
 public class PredictedLabelsController {
+
     @Resource
     private PredictedLabelsService predictedLabelsService;
 
-    private static final String DIRECTORY = "/path/on/server/data/";
+    @Value("${DATA_PATH}")
+    private static String DIRECTORY;
 
     System.Logger logger = System.getLogger(PredictedLabelsController.class.getName());
 
