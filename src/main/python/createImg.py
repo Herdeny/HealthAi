@@ -4,8 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import networkx as nx
 
-# file_path = sys.argv[1]
-file_path = "../../../data/adj.tsv"
+file_path = sys.argv[1]
+# file_path = "../../../data/adj.tsv"
 grn_data = pd.read_csv(file_path, sep='\t')
 grn_data = grn_data.iloc[:250, :3]
 
@@ -81,7 +81,7 @@ edges = G.edges()
 weights = [G[u][v]['weight'] for u, v in edges]
 print(weights)
 nx.draw(G, pos, node_size=node_sizes, node_color=node_color_values, edge_color=weights, edge_cmap=plt.cm.PuBuGn,
-        width=5)
+        width=15)
 # 使用 nx.draw_networkx_edges 绘制边
 # nx.draw_networkx_edges(G, pos, edge_color=weights, edge_cmap=plt.cm.PuBuGn, width=2)
 #
