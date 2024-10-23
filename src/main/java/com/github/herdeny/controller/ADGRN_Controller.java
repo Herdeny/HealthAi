@@ -8,15 +8,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/adgrn")
 public class ADGRN_Controller extends CommonController{
+
     @Autowired
     private ADGRN_Service adgrnService;
 
-    private static final String DIRECTORY = "/path/on/server/data/";
+    @Value("${DATA_PATH}")
+    private static String DIRECTORY;
 
     System.Logger logger = System.getLogger(ADGRN_Controller.class.getName());
 

@@ -5,6 +5,7 @@ import com.github.herdeny.utils.StringTools;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,7 +28,8 @@ import java.io.OutputStream;
 @RestController
 public class CommonController {
 
-    private static final String DIRECTORY = "/path/on/server/data/";
+    @Value("${DATA_PATH}")
+    private static String DIRECTORY;
 
     private static final Logger logger = LoggerFactory.getLogger(CommonController.class);
 
