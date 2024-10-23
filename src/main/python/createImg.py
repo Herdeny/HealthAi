@@ -4,7 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import networkx as nx
 
-file_path = sys.argv[1]
+# file_path = sys.argv[1]
+file_path = "../../../data/adj.tsv"
 grn_data = pd.read_csv(file_path, sep='\t')
 grn_data = grn_data.iloc[:250, :3]
 
@@ -88,4 +89,5 @@ nx.draw(G, pos, node_size=node_sizes, node_color=node_color_values, edge_color=w
 # nx.draw_networkx_nodes(G, pos, node_size=node_sizes, node_color=node_color_values)
 
 
-plt.savefig("/path/on/server/data/GRN.png", format="PNG", dpi=250, bbox_inches='tight', pad_inches=0)
+# plt.savefig("/path/on/server/data/GRN.png", format="PNG", dpi=250, bbox_inches='tight', pad_inches=0)
+plt.savefig("../../../data/GRN.png", format="PNG", dpi=250, bbox_inches='tight', pad_inches=0)

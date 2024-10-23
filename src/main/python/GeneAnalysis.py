@@ -2,17 +2,22 @@
 import sys
 import pandas as pd
 import numpy as np
-mapping = pd.read_csv(sys.argv[3])
+
+
+# mapping = pd.read_csv(sys.argv[3])
+mapping = pd.read_csv("../../../data/label_mapping.csv")
 mapping_filtered = mapping[~mapping['Gene_name'].isin(['1-Sep', '10-Sep', '11-Sep',
 '14-Sep', '15-Sep', '2-Mar', '2-Sep', '3-Sep', '4-Sep', '5-Sep', '6-Sep', '7-Sep',
 '8-Sep', '9-Sep', 'NRD1', 'SRPR'])]
-df = pd.read_csv(sys.argv[1],header = 0,index_col=0) ##用户输入数据
+# df = pd.read_csv(sys.argv[1],header = 0,index_col=0) ##用户输入数据
+df = pd.read_csv("../../../data/GSM3704373_6b-MAP2_filtered.csv")
 # 行列转置
 df=df.T
 df = df.loc[mapping_filtered["Gene_name"].tolist()]
 
 # 时空融合
-sp = pd.read_csv(sys.argv[2], index_col=None, header=0)  ##这是ROSMAP数据空间融合后的结果
+# sp = pd.read_csv(sys.argv[2], index_col=None, header=0)  ##这是ROSMAP数据空间融合后的结果
+sp = pd.read_csv("../../../data/final_spatial_fusion.csv")
 sp.index = mapping['Gene_name']
 sp_filtered = sp[~sp.index.isin(['1-Sep', '10-Sep', '11-Sep', '14-Sep', '15-Sep',
                                  '2-Mar', '2-Sep', '3-Sep', '4-Sep', '5-Sep', '6-Sep', '7-Sep', '8-Sep', '9-Sep',
@@ -219,7 +224,8 @@ patient_matrix1 = []
 patient_matrix2 = []
 
 ##如果有多个矩阵，这一块代码（到patient_matrix2.append为止）需要进行for循环读取数据，每一个样本都需要进行融合
-df = pd.read_csv(sys.argv[1], header=0, index_col=0)
+# df = pd.read_csv(sys.argv[1], header=0, index_col=0)
+df = pd.read_csv("../../../data/GSM4432645_EC2.csv")
 a = pca.fit_transform(df.values.T)
 Wy = neighbor_graph(a, k=5)
 pX, pY = ManifoldLinear(graph_embedding, a, corr, 100, Wx,
@@ -235,7 +241,8 @@ patient_matrix2.shape[2], 1))
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import tensorflow as tf
 ##读入三个文件中的一个，想要预测CERAD就读入CERAD模型，想要预测Braak就读入Braak模型，想要预测Cogdx就读入Cogdx模型
-best_model = tf.keras.models.load_model(sys.argv[6])
+# best_model = tf.keras.models.load_model(sys.argv[6])
+best_model = tf.keras.models.load_model('../../../data/best_model_tempro-spatialfusion_Braak.h5')
 with tf.device("/cpu:0"):
     predictions = best_model.predict(X)
 

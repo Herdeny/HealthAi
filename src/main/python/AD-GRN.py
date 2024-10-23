@@ -3,7 +3,9 @@ import scanpy as sc
 import loompy as lp
 import numpy as np
 
-file_path = sys.argv[1]
+
+# file_path = sys.argv[1]
+file_path = "../../../data/ACT_377_4830.csv"
 # # 使用 sc.read_csv 读取文件
 x = sc.read_csv(file_path)
 
