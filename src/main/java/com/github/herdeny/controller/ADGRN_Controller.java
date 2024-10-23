@@ -8,16 +8,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/adgrn")
 public class ADGRN_Controller extends CommonController{
-
     @Autowired
     private ADGRN_Service adgrnService;
 
-    @Value("${DATA_PATH}")
-    private static String DIRECTORY;
+    private static final String DIRECTORY = "/path/on/server/data/";
 
     System.Logger logger = System.getLogger(ADGRN_Controller.class.getName());
 
@@ -70,7 +69,7 @@ public class ADGRN_Controller extends CommonController{
     @GetMapping("/getGRN")
     public void getAvatar(HttpServletResponse response) {
         String GRNFolderPath = DIRECTORY + "GRN.png";
-        // 判断GRN路径是否存在
+        // 判断用户头像是否存在，如果不存在就使用默认头像
         while (!new File(GRNFolderPath).exists()) {
             return;
         }
