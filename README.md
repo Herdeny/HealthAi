@@ -54,7 +54,7 @@ HealthAI
 │  ├─ best_model_tempro-spatialfusion_CERAD.h5		——疾病预测及ROC曲线生成
 │  ├─ best_model_tempro-spatialfusion_Cogdx.h5		——疾病预测及ROC曲线生成
 │  ├─ final_spatial_fusion.csv		——疾病预测及ROC曲线生成
-│  ├─ hg38\__refseq-r80__10kb_up_and_down_tss.mc9nr.genes_vs_motifs.rankings.feather		——AD-GRN
+│  ├─ hg38\__refseq-r80__10kb_up_and_down_tss.mc9nr.genes_vs_motifs.rankings.feather	——AD-GRN
 │  ├─ hs_hgnc_tfs.txt		——AD-GRN
 │  ├─ label.csv		——疾病预测及ROC曲线生成
 │  ├─ label_mapping.csv		——疾病预测及ROC曲线生成
@@ -83,4 +83,3 @@ HealthAI
 ## 测试数据说明
 
 //TODO
-
