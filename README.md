@@ -4,13 +4,15 @@
 
 ### 项目配置
 
-项目主体部分 基于 open-jdk 21 开发
+项目主体部分 基于 `open-jdk 21.0.2` 开发
 
 项目配置文件位于`src/main/resources/`
 
-prod 版本为远程部署文件  dev 版本为本地部署文件
+`dev` 版本为本地部署文件
 
-使用时应先将 src/main/resources/application.properties 内的
+`prod` 版本为远程部署文件
+
+使用时应先将 `src/main/resources/application.properties` 内的
 
 ```
 spring.profiles.active=dev
@@ -20,13 +22,15 @@ spring.profiles.active=dev
 
 ### Python环境
 
-Python脚本文件环境目录位于 `src/main/python/environment.yml`
+`Python` 脚本文件环境目录位于 `src/main/python/environment.yml`
 
 基于环境目录创建环境，可以使用以下指令：
 
 ```bash
 conda env create -f environment.yml
 ```
+
+`Python` 版本为 `3.9`
 
 ## 项目结构
 
