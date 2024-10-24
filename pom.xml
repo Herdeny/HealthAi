@@ -32,15 +32,21 @@
 	</properties>
 
 	<dependencies>
+
+		<!-- 集成beetl -->
 		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
+			<groupId>com.ibeetl</groupId>
+			<artifactId>beetl-framework-starter</artifactId>
+			<version>1.2.30.RELEASE</version>
 		</dependency>
+
+		<!-- 集成hutool工具类简便操作 -->
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.12.0</version>
+			<groupId>cn.hutool</groupId>
+			<artifactId>hutool-core</artifactId>
+			<version>5.8.9</version>
 		</dependency>
+
 		<!-- web依赖 -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
