@@ -30,6 +30,7 @@ conda env create -f environment.yml
 
 ## 项目结构
 
+```
 HealthAI
 ├─ mvnw
 ├─ mvnw.cmd
@@ -75,6 +76,9 @@ HealthAI
 └─ .mvn
    └─ wrapper
       └─ maven-wrapper.properties
+```
+
+
 
 ## 测试数据说明
 
