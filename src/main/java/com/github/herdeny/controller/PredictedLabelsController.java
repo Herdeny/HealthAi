@@ -18,6 +18,7 @@ import java.util.concurrent.Executors;
  * ClassName: PredictedLabelsController
  * Description:
  * 疾病阶段预测控制层
+ *
  * @Author Joel
  * @Create 2024/10/3 16:09
  * @Version 1.0
@@ -31,13 +32,13 @@ public class PredictedLabelsController {
     private PredictedLabelsService predictedLabelsService;
 
     @Value("${DATA_PATH}")
-    private static String DIRECTORY;
+    private String DIRECTORY;
 
     System.Logger logger = System.getLogger(PredictedLabelsController.class.getName());
 
     @PostMapping("/run")
     public Result run(@RequestParam String fileName) {
-        String filePath =  fileName;
+        String filePath = DIRECTORY + "/" + fileName;
         String result = predictedLabelsService.predict(filePath);
         return Result.success(result);
     }

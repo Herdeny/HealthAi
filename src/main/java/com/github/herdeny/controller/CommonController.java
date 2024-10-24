@@ -29,7 +29,7 @@ import java.io.OutputStream;
 public class CommonController {
 
     @Value("${DATA_PATH}")
-    private static String DIRECTORY;
+    private String DIRECTORY;
 
     private static final Logger logger = LoggerFactory.getLogger(CommonController.class);
 

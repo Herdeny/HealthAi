@@ -15,10 +15,10 @@ public class ROC_Controller {
     private ROC_Service rocService;
 
     @Value("${DATA_PATH}")
-    private static String DATA_PATH;
+    private String DATA_PATH;
 
     @Value("${MODEL_PATH}")
-    private static String MODEL_PATH;
+    private String MODEL_PATH;
 
     System.Logger logger = System.getLogger(PredictedLabelsController.class.getName());
 
