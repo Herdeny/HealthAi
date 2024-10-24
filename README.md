@@ -53,6 +53,8 @@ HealthAI
 │        ├─ createROC.py		——绘制ROC曲线
 │        ├─ environment.yml		——环境文件
 │        └─ GeneAnalysis.py		——疾病预测
+│     └─ java
+│        └─ ...		——项目主体
 ├─ model
 │  ├─ best_model_tempro-spatialfusion_Braak.h5		——疾病预测及ROC曲线生成
 │  ├─ best_model_tempro-spatialfusion_CERAD.h5		——疾病预测及ROC曲线生成
