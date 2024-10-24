@@ -37,9 +37,9 @@ public class PredictedLabelsController {
 
     @PostMapping("/run")
     public Result run(@RequestParam String fileName) {
-        String filePath = DIRECTORY + fileName;
+        String filePath =  fileName;
         String result = predictedLabelsService.predict(filePath);
-        return Result.success("It is predicted that the patient is currently in the disease stage"+result);
+        return Result.success(result);
     }
 
  /*   @GetMapping(value = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

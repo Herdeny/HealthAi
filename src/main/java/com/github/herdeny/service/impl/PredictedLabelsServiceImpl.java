@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
+
 /**
  * ClassName: PredictedLabelsServiceImpl
  * Description:
@@ -23,6 +24,9 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
 
     @Value("${PYTHON_PATH}")
     String pythonPath;
+
+    @Value("${DATA_PATH}")
+    String dataPath;
 
     @Value("${GeneAnalysisPath}")
     String GeneAnalysisPath;
@@ -44,13 +48,15 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
 
     /**
      * 疾病阶段预测
+     *
      * @param filePath 用户传入的csv文件路径
      */
     @Override
     public String predict(String filePath) {
         System.out.println("Start Predicting pathological stages...");
 
-        String[] args1 = new String[]{pythonPath, GeneAnalysisPath, filePath,
+        System.out.println(dataPath);
+        String[] args1 = new String[]{pythonPath, GeneAnalysisPath, dataPath + "/" + filePath,
                 final_spatial_fusion, label_mapping,
                 best_model_tempro_spatialfusion_Braak,
                 best_model_tempro_spatialfusion_CERAD,
@@ -97,8 +103,8 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
             errorThread.join();
 
             if (exitCode == 0) {
-                System.out.println("Completed Predicting pathological stages");
-                return outputBuilder.toString();
+                String result = outputBuilder.toString();
+                return result.substring(result.lastIndexOf('[') + 1, result.lastIndexOf(']'));
             } else {
                 System.err.println("Process exited with code: " + exitCode);
                 // 可以根据需要返回不同的结果或抛出异常
