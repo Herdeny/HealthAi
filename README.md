@@ -65,7 +65,7 @@ HealthAI
 │  ├─ label.csv		——疾病预测及ROC曲线生成
 │  ├─ label_mapping.csv		——疾病预测及ROC曲线生成
 │  └─ motifs-v9-nr.hgnc-m0.001-o0.0.tbl		——AD-GRN
-├─ model
+├─ data
 │  ├─ ACT_377_4830.csv		——AD-GRN测试文件
 │  ├─ ......
 │  └─ test_data		——疾病预测及ROC曲线生成测试文件
