@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executors;
@@ -34,6 +35,12 @@ public class PredictedLabelsController {
     @Value("${DATA_PATH}")
     private String DIRECTORY;
 
+    @Value("${TEST_DATA1_PATH}")
+    private String TEST_DATA1_PATH;
+
+    @Value("${TEST_DATA2_PATH}")
+    private String TEST_DATA2_PATH;
+
     System.Logger logger = System.getLogger(PredictedLabelsController.class.getName());
 
     @PostMapping("/run")
@@ -42,4 +49,37 @@ public class PredictedLabelsController {
         return Result.success(result);
     }
 
+    @GetMapping("/test1/name")
+    public Result getTest1Name(){
+        // 创建一个 File 对象以指向 TEST_DATA1_PATH 路径
+        File directory = new File(TEST_DATA1_PATH);
+        // 检查路径是否存在且是一个目录
+        if (!directory.exists() || !directory.isDirectory()) {
+            return Result.error("路径不存在或不是一个目录");
+        }
+        // 获取目录下的所有文件名
+        String[] fileNames = directory.list((dir, name) -> new File(dir, name).isFile());
+        // 检查是否成功读取文件名
+        if (fileNames == null) {
+            return Result.error("无法读取文件名");
+        }
+        return Result.success(fileNames);
+    }
+
+    @GetMapping("/test2/name")
+    public Result getTest2Name(){
+        // 创建一个 File 对象以指向 TEST_DATA2_PATH 路径
+        File directory = new File(TEST_DATA2_PATH);
+        // 检查路径是否存在且是一个目录
+        if (!directory.exists() || !directory.isDirectory()) {
+            return Result.error("路径不存在或不是一个目录");
+        }
+        // 获取目录下的所有文件名
+        String[] fileNames = directory.list((dir, name) -> new File(dir, name).isFile());
+        // 检查是否成功读取文件名
+        if (fileNames == null) {
+            return Result.error("无法读取文件名");
+        }
+        return Result.success(fileNames);
+    }
 }
