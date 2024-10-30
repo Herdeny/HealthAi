@@ -29,7 +29,7 @@ import java.io.OutputStream;
 public class CommonController {
 
     @Value("${DATA_PATH}")
-    private String DIRECTORY;
+    private String DATA_PATH;
 
     private static final Logger logger = LoggerFactory.getLogger(CommonController.class);
 
@@ -41,7 +41,7 @@ public class CommonController {
             return Result.error("文件为空");
         }
         //检查目标文件夹是否存在，如果目标文件夹不存在，则创建
-        File directory = new File(DIRECTORY);
+        File directory = new File(DATA_PATH);
         if(!directory.exists()){
             directory.mkdirs();
         }
