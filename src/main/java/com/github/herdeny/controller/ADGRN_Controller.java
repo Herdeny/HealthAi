@@ -75,7 +75,7 @@ public class ADGRN_Controller extends CommonController{
         while (!new File(GRNFolderPath).exists()) {
             return;
         }
-        response.setContentType("image/jpeg");
+        response.setContentType("image/png");
         readFile(response, GRNFolderPath);
     }
 
