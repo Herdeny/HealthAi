@@ -21,16 +21,11 @@ public class ADGRN_Controller extends CommonController{
 
     System.Logger logger = System.getLogger(ADGRN_Controller.class.getName());
 
-    /**
-     * 测试接口
-     * @param fileName
-     * @return
-     */
+
     @PostMapping("/test")
-    public Result Test(@RequestParam String fileName) {
-        logger.log(System.Logger.Level.INFO, "Test");
-        logger.log(System.Logger.Level.INFO, DATA_PATH);
-        return Result.success(fileName);
+    public Result Test(@RequestParam String uid) {
+        adgrnService.adgrn_test(uid);
+        return Result.success("ok");
     }
 
     @PostMapping("/run")
@@ -41,6 +36,7 @@ public class ADGRN_Controller extends CommonController{
         adgrnService.adgrn_createImg("adj.tsv");
         return Result.success(null);
     }
+
 
     @PostMapping("/loom")
     public Result loom(String filePath) {

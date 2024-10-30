@@ -7,4 +7,6 @@ public interface ADGRN_Service {
 
     int adgrn_createTSV(String filePath);
 
+    void adgrn_test(String uid);
+
 }

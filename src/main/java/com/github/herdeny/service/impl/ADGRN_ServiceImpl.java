@@ -1,6 +1,8 @@
 package com.github.herdeny.service.impl;
 
 import com.github.herdeny.service.ADGRN_Service;
+import com.github.herdeny.utils.SseClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -8,9 +10,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+
 
 @Service
 public class ADGRN_ServiceImpl implements ADGRN_Service {
+
+    @Value("${MODEL_PATH}")
+    String MODEL_PATH;
+
+    @Value("${DATA_PATH}")
+    String DATA_PATH;
 
     @Value("${PYTHON_PATH}")
     String pythonPath;
@@ -24,6 +34,9 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
     @Value("${CREATE_IMG_PATH}")
     String CREATE_IMG_PATH;
 
+    @Value("${CREATE_ADGRN_COMPLEX_PATH}")
+    String CREATE_ADGRN_COMPLEX_PATH;
+
     @Value("${hg38}")
     String hg38_PATH;
 
@@ -32,6 +45,9 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
 
     @Value("${motifs_PATH}")
     String motifs_PATH;
+
+    @Autowired
+    private SseClient sseClient;
 
     @Override
     public String adgrn_createLoom(String filePath) {
@@ -133,6 +149,41 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
         }
         System.out.println("Complete Generate TSV");
         return 0;
+    }
+
+    @Override
+    public void adgrn_test(String uid) {
+        System.out.println("Test-Start Generate Image...");
+        sseClient.sendMessage(uid, "start", "Start Generate Image...");
+
+        String[] args1 = new String[]{pythonPath, CREATE_ADGRN_COMPLEX_PATH, MODEL_PATH, DATA_PATH};
+
+        try {
+            Process process = Runtime.getRuntime().exec(args1);
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
+            BufferedReader err = new BufferedReader(new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8));
+
+            String actionStr;
+            while ((actionStr = in.readLine()) != null) {
+                System.out.println(actionStr);
+                String messageId = UUID.randomUUID().toString();
+                sseClient.sendMessage(uid, messageId, actionStr);
+
+            }
+
+            String errorStr;
+            while ((errorStr = err.readLine()) != null) {
+                System.err.println(errorStr);
+            }
+            in.close();
+            err.close();
+            process.waitFor();
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("Test-Complete Generate Image");
+        sseClient.sendMessage(uid, "end", "Complete Generate Image");
     }
 }
 
