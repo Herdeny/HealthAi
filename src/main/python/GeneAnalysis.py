@@ -1,5 +1,11 @@
 # 基因筛选
+import io
 import sys
+
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
+
 import pandas as pd
 import numpy as np
 mapping = pd.read_csv(sys.argv[3])

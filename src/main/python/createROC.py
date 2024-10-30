@@ -1,7 +1,10 @@
 # 基因筛选
 
-import os
+import io
 import sys
+
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 import numpy as np
 import pandas as pd
@@ -10,20 +13,20 @@ import pandas as pd
 # data_path = "../../../data"
 model_path = sys.argv[1]
 data_path = sys.argv[2]
-mapping = pd.read_csv(model_path + "/label_mapping.csv")
+mapping = pd.read_csv(model_path + "label_mapping.csv")
 
 mapping_filtered = mapping[~mapping['Gene_name'].isin(['1-Sep', '10-Sep', '11-Sep',
 '14-Sep', '15-Sep', '2-Mar', '2-Sep', '3-Sep', '4-Sep', '5-Sep', '6-Sep', '7-Sep',
 '8-Sep', '9-Sep', 'NRD1', 'SRPR'])]
 
 
-df = pd.read_csv(data_path + "/GSM4432654_EC10.csv",header = 0,index_col=0) ##用户输入数据
+df = pd.read_csv(data_path + "GSM4432654_EC10.csv",header = 0,index_col=0) ##用户输入数据
 # 行列转置
 df=df.T
 df = df.loc[mapping_filtered["Gene_name"].tolist()]
 
 # 时空融合
-sp = pd.read_csv(model_path + "/final_spatial_fusion.csv", index_col=None, header=0)  ##这是ROSMAP数据空间融合后的结果
+sp = pd.read_csv(model_path + "final_spatial_fusion.csv", index_col=None, header=0)  ##这是ROSMAP数据空间融合后的结果
 sp.index = mapping['Gene_name']
 sp_filtered = sp[~sp.index.isin(['1-Sep', '10-Sep', '11-Sep', '14-Sep', '15-Sep',
                                  '2-Mar', '2-Sep', '3-Sep', '4-Sep', '5-Sep', '6-Sep', '7-Sep', '8-Sep', '9-Sep',
@@ -229,7 +232,7 @@ pca = PCA(n_components=100)
 patient_matrix1 = []
 patient_matrix2 = []
 
-directory = data_path + "/test_data/"
+directory = data_path + "test_data/"
 
 # 遍历目录下的文件
 for filename in os.listdir(directory):
@@ -251,7 +254,7 @@ X = patient_matrix2.reshape((patient_matrix2.shape[0], patient_matrix2.shape[1],
 patient_matrix2.shape[2], 1))
 import tensorflow as tf
 ##读入三个文件中的一个，想要预测CERAD就读入CERAD模型，想要预测Braak就读入Braak模型，想要预测Cogdx就读入Cogdx模型
-best_model = tf.keras.models.load_model(model_path + '/best_model_tempro-spatialfusion_Cogdx.h5')
+best_model = tf.keras.models.load_model(model_path + 'best_model_tempro-spatialfusion_Cogdx.h5')
 with tf.device("/cpu:0"):
     predictions = best_model.predict(X)
 
@@ -282,7 +285,7 @@ print(predicted_labels)
 # df.to_csv('./Braak.csv',index=None,columns=None)
 
 df = pd.DataFrame(predictions)
-df.to_csv(data_path + "/Braak.csv", index=None, columns=None)
+df.to_csv(data_path + "Braak.csv", index=None, columns=None)
 
 from sklearn.preprocessing import label_binarize
 from sklearn.metrics import roc_curve
@@ -295,11 +298,11 @@ colors = ["#CBE99A","#FDB96A","#87CFA4"]
 plt.figure(figsize=(20, 20))
 plt.rc('font', size=20)
  ## Braak、CERAD、CogDx三个变量分别读取预测的三个指标的predictions数据
-Braak = pd.read_csv(data_path + "/Braak.csv")
+Braak = pd.read_csv(data_path + "Braak.csv")
 # CERAD = pd.read_csv("./CERAD.csv")
 # CogDx = pd.read_csv("./CogDx.csv")
  ## 读取真实标签
-true = pd.read_csv(model_path + "/label.csv",header = 0,index_col=None)
+true = pd.read_csv(model_path + "label.csv",header = 0,index_col=None)
 
 true_label1 = list(map(int,true["Braak"].tolist()))
 # true_label2 = list(map(int,true["CERAD"].tolist()))
@@ -333,6 +336,6 @@ plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.legend(loc="lower right")
 plt.tight_layout()
-plt.savefig(data_path + '/ROC.png',dpi=750,bbox_inches='tight')
+plt.savefig(data_path + 'ROC.png',dpi=750,bbox_inches='tight')
 plt.show()
 

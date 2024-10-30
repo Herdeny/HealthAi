@@ -1,8 +1,15 @@
+import io
 import sys
+
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import networkx as nx
+
+from src.main.python.createADGRN_complex import data_path
 
 file_path = sys.argv[1]
 # file_path = "../../../data/adj.tsv"
@@ -90,4 +97,4 @@ nx.draw(G, pos, node_size=node_sizes, node_color=node_color_values, edge_color=w
 
 
 # plt.savefig("/path/on/server/data/GRN.png", format="PNG", dpi=250, bbox_inches='tight', pad_inches=0)
-plt.savefig("../../../data/GRN.png", format="PNG", dpi=250, bbox_inches='tight', pad_inches=0)
+plt.savefig(data_path + "GRN.png", format="PNG", dpi=250, bbox_inches='tight', pad_inches=0)

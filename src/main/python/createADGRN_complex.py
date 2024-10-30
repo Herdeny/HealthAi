@@ -1,10 +1,18 @@
+import io
+import sys
+
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
 import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
-import numpy as np
 
+
+model_path = sys.argv[1]
+data_path = sys.argv[2]
 print("开始加载模块信息...")
-module_info = pd.read_excel("./模块信息.xlsx")
+module_info = pd.read_excel(data_path + "模块信息.xlsx")
 print("模块信息已加载。")
 # print(module_info)
 
@@ -142,13 +150,13 @@ print(f"模块数量: {len(l_dic)}个基因被分配到 {len(M)} 个模块。")
 
 ## 原代码（使用共表达网络）
 ## edge保存的是边信息，node保存的是节点信息
-edge = pd.read_csv("./braak_3.csv.edges.txt", sep='\t')
-node = pd.read_csv("./braak_3.csv.nodes.txt", sep='\t')
+edge = pd.read_csv(data_path + "braak_3.csv.edges.txt", sep='\t')
+node = pd.read_csv(data_path + "braak_3.csv.nodes.txt", sep='\t')
 print("边信息和节点信息已加载。")
 
 ## 如果使用基因调控网络，则需要根据tsv文件读取结果
 ## tsv文件的一行有三个数据，表示一条边，TF是边的调控节点，target是边的目标节点
-b_3 = pd.read_csv("./adj_braak3.tsv",sep='\t')
+b_3 = pd.read_csv(data_path + "adj_braak3.tsv",sep='\t')
 print("基因调控网络数据已读取。")
 
 node_list = []
@@ -230,7 +238,7 @@ nx.draw_networkx_edges(G, pos,
                        alpha=0.7)
 
 print("正在保存图像...")
-plt.savefig("./GRN.png", format="PNG", dpi=250, bbox_inches='tight', pad_inches=0)
+plt.savefig(data_path + "GRN.png", format="PNG", dpi=250, bbox_inches='tight', pad_inches=0)
 print("图像已保存")
 
 # 输出节点、边和模块的数量
