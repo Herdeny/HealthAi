@@ -17,7 +17,7 @@ public class ADGRN_Controller extends CommonController{
     private ADGRN_Service adgrnService;
 
     @Value("${DATA_PATH}")
-    private String DIRECTORY;
+    private String DATA_PATH;
 
     System.Logger logger = System.getLogger(ADGRN_Controller.class.getName());
 
@@ -29,13 +29,13 @@ public class ADGRN_Controller extends CommonController{
     @PostMapping("/test")
     public Result Test(@RequestParam String fileName) {
         logger.log(System.Logger.Level.INFO, "Test");
-        logger.log(System.Logger.Level.INFO, DIRECTORY);
+        logger.log(System.Logger.Level.INFO, DATA_PATH);
         return Result.success(fileName);
     }
 
     @PostMapping("/run")
     public Result run(@RequestParam String fileName) {
-        String filePath = DIRECTORY + "/" + fileName;
+        String filePath = DATA_PATH + "/" + fileName;
         String loom_filePath = adgrnService.adgrn_createLoom(filePath);
         adgrnService.adgrn_createTSV(loom_filePath);
         adgrnService.adgrn_createImg("adj.tsv");
@@ -70,7 +70,7 @@ public class ADGRN_Controller extends CommonController{
      */
     @GetMapping("/getGRN")
     public void getAvatar(HttpServletResponse response) {
-        String GRNFolderPath = DIRECTORY + "/GRN.png";
+        String GRNFolderPath = DATA_PATH + "/GRN.png";
         // 判断GRN路径是否存在
         while (!new File(GRNFolderPath).exists()) {
             return;
