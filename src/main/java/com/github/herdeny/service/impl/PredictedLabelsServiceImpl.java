@@ -56,7 +56,7 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
         System.out.println("Start Predicting pathological stages...");
 
         System.out.println(dataPath);
-        String[] args1 = new String[]{pythonPath, GeneAnalysisPath, dataPath + "/" + filePath,
+        String[] args1 = new String[]{pythonPath, GeneAnalysisPath, dataPath  + filePath,
                 final_spatial_fusion, label_mapping,
                 best_model_tempro_spatialfusion_Braak,
                 best_model_tempro_spatialfusion_CERAD,

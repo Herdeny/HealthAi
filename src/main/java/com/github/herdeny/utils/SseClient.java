@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class SseClient {
     private static final Map<String, SseEmitter> sseEmitterMap = new ConcurrentHashMap<>();
+
     /**
      * 创建连接
      */
@@ -57,9 +58,8 @@ public class SseClient {
 
     /**
      * 给指定用户发送消息
-     *
      */
-    public boolean sendMessage(String uid,String messageId, String message) {
+    public boolean sendMessage(String uid, String messageId, String message) {
         if (StrUtil.isBlank(message)) {
             log.info("参数异常，msg为null", uid);
             return false;
@@ -70,12 +70,12 @@ public class SseClient {
             return false;
         }
         try {
-            sseEmitter.send(SseEmitter.event().id(messageId).reconnectTime(1*60*1000L).data(message));
-            log.info("用户{},消息id:{},推送成功:{}", uid,messageId, message);
+            sseEmitter.send(SseEmitter.event().id(messageId).reconnectTime(1 * 60 * 1000L).data(message));
+            log.info("用户{},消息id:{},推送成功:{}", uid, messageId, message);
             return true;
-        }catch (Exception e) {
+        } catch (Exception e) {
             sseEmitterMap.remove(uid);
-            log.info("用户{},消息id:{},推送异常:{}", uid,messageId, e.getMessage());
+            log.info("用户{},消息id:{},推送异常:{}", uid, messageId, e.getMessage());
             sseEmitter.complete();
             return false;
         }
@@ -83,15 +83,16 @@ public class SseClient {
 
     /**
      * 断开
+     *
      * @param uid
      */
-    public void closeSse(String uid){
+    public void closeSse(String uid) {
         if (sseEmitterMap.containsKey(uid)) {
             SseEmitter sseEmitter = sseEmitterMap.get(uid);
             sseEmitter.complete();
             sseEmitterMap.remove(uid);
-        }else {
-            log.info("用户{} 连接已关闭",uid);
+        } else {
+            log.info("用户{} 连接已关闭", uid);
         }
 
     }
