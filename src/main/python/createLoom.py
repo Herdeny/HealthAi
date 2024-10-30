@@ -1,11 +1,16 @@
+import io
 import sys
+
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
 import scanpy as sc
 import loompy as lp
 import numpy as np
 
-
 # file_path = sys.argv[1]
-file_path = "../../../data/ACT_377_4830.csv"
+data_path = sys.argv[1]
+file_path = data_path + "ACT_377_4830.csv"
 # # 使用 sc.read_csv 读取文件
 x = sc.read_csv(file_path)
 
