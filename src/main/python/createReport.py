@@ -28,6 +28,10 @@ PILImage.MAX_IMAGE_PIXELS = None
 PAGE_HEIGHT = A4[1]
 PAGE_WIDTH = A4[0]
 
+# 加载图像
+img = PILImage.open("aliyun.png")
+img = img.convert("RGBA")
+
 # 日期
 report_date = datetime.date.today()
 
@@ -99,12 +103,15 @@ def DrawPageFoot(c: Canvas, date=datetime.date.today):
     c.setFont(song, 8)
     c.setFillColor(colors.black)
     c.drawString(30, PAGE_HEIGHT - 810, f"报告生成日期：{report_date}，Health_AI提供技术支持")
+    image_height = 15
+    c.drawImage("aliyun.png", 435, PAGE_HEIGHT - 814, width=image_height*3.25, height=image_height, mask='auto')
+    c.drawString(490, PAGE_HEIGHT - 810, "8H16G_ECS_Supported")
 
 
 # 添加报告部分
 # 报告内容
 Story = [Spacer(1, inch), Paragraph("诊断结果", ParagraphStyle(
-    name="SimSunHeading", fontName=song, fontSize=18, leading=22, spaceBefore=10,spaceAfter=5
+    name="SimSunHeading", fontName=song, fontSize=18, leading=22, spaceBefore=10, spaceAfter=5
 ))]
 
 # 添加表格示例（病理学数据）
@@ -135,7 +142,6 @@ Story.append(table)
 Story.append(Spacer(1, 0.5 * inch))
 
 Story.append(Paragraph("图像分析:", styleSubH))
-
 
 # 定义每行放置的图片数量
 images_per_row = 1  # 每行1张图片
