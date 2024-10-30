@@ -25,10 +25,10 @@ public class ROC_ServiceImpl implements ROC_Service {
     private String dataPath;
 
     @Override
-    public String test() {
+    public String test(String test_code) {
         System.out.println("Start generate ROC...");
 
-        String[] args1 = new String[]{pythonPath, createROCPath, modelPath, dataPath};
+        String[] args1 = new String[]{pythonPath, createROCPath, modelPath, dataPath, test_code};
 
         Process process = null;
         StringBuilder outputBuilder = new StringBuilder(); // 用于存储Python输出结果

@@ -23,8 +23,8 @@ public class ROC_Controller {
     System.Logger logger = System.getLogger(PredictedLabelsController.class.getName());
 
     @PostMapping("/test")
-    public Result test() {
-        String result = rocService.test();
+    public Result test(@RequestParam String test_code) {
+        String result = rocService.test(test_code);
         return Result.success("test completed" + result);
     }
 }

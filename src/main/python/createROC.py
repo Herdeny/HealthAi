@@ -6,6 +6,7 @@ import sys
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
+import os
 import numpy as np
 import pandas as pd
 
@@ -13,6 +14,7 @@ import pandas as pd
 # data_path = "../../../data"
 model_path = sys.argv[1]
 data_path = sys.argv[2]
+test_code = sys.argv[3]
 mapping = pd.read_csv(model_path + "label_mapping.csv")
 
 mapping_filtered = mapping[~mapping['Gene_name'].isin(['1-Sep', '10-Sep', '11-Sep',
@@ -232,7 +234,7 @@ pca = PCA(n_components=100)
 patient_matrix1 = []
 patient_matrix2 = []
 
-directory = data_path + "test_data/"
+directory = data_path + "test_data" + test_code +"/"
 
 # 遍历目录下的文件
 for filename in os.listdir(directory):
@@ -302,7 +304,7 @@ Braak = pd.read_csv(data_path + "Braak.csv")
 # CERAD = pd.read_csv("./CERAD.csv")
 # CogDx = pd.read_csv("./CogDx.csv")
  ## 读取真实标签
-true = pd.read_csv(model_path + "label.csv",header = 0,index_col=None)
+true = pd.read_csv(model_path + "label"+ test_code +".csv",header = 0,index_col=None)
 
 true_label1 = list(map(int,true["Braak"].tolist()))
 # true_label2 = list(map(int,true["CERAD"].tolist()))
