@@ -18,8 +18,8 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
     @Value("${PYSCENIC_PATH}")
     String pyScenicPath;
 
-    @Value("${AD_GRN_PATH}")
-    String AD_GRN_PATH;
+    @Value("${CREATE_LOOM_PATH}")
+    String CREATE_LOOM_PATH;
 
     @Value("${CREATE_IMG_PATH}")
     String CREATE_IMG_PATH;
@@ -37,7 +37,7 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
     public String adgrn_createLoom(String filePath) {
         System.out.println("Start Generate Loom...");
 
-        String[] args1 = new String[]{pythonPath, AD_GRN_PATH, filePath};
+        String[] args1 = new String[]{pythonPath, CREATE_LOOM_PATH, filePath};
 
         try {
             Process process = Runtime.getRuntime().exec(args1);
