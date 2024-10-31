@@ -89,7 +89,7 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
         System.out.println("Start Generate Image...");
         sseClient.sendMessage(uid, uid + "-start-create-img", "Start Generate Image...");
 
-        String[] args1 = new String[]{pythonPath, CREATE_IMG_PATH, filePath};
+        String[] args1 = new String[]{pythonPath, CREATE_IMG_PATH, DATA_PATH, filePath};
 
         try {
             Process process = Runtime.getRuntime().exec(args1);

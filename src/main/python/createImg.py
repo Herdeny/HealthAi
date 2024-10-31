@@ -9,9 +9,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from src.main.python.createADGRN_complex import data_path
-
-file_path = sys.argv[1]
+data_path = sys.argv[1]
+file_path = sys.argv[2]
 # file_path = "../../../data/adj.tsv"
 grn_data = pd.read_csv(file_path, sep='\t')
 grn_data = grn_data.iloc[:250, :3]
