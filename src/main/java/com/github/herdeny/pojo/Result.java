@@ -3,7 +3,6 @@ package com.github.herdeny.pojo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.json.JSONObject;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,9 +13,6 @@ public class Result<T> {
     private T data;//响应数据
 
     public static <E> Result<E> success(E data) {
-        if (data instanceof JSONObject) {
-            return new Result<>(0, "success", data);
-        }
         return new Result<>(0, "success", data);
     }
 
