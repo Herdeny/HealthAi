@@ -46,16 +46,17 @@ styleSubH = ParagraphStyle(name="SimSubSunHeading", fontName=song, fontSize=16, 
 styleCenter = ParagraphStyle(name="Center", fontName=song, fontSize=12, leading=14, alignment=TA_CENTER)
 
 # 图片和描述
-images = ['1.png', '2.png', '3.png']  # 图片路径
-descriptions = ['ROC曲线', 'PR曲线', '小提琴图']  # 对应的图片描述
+images = ['GRN.png','1.png', '2.png', '3.png']  # 图片路径
+descriptions = ['AD-GRN地形图','ROC曲线', 'PR曲线', '小提琴图']  # 对应的图片描述
 
 
 # 页面标题
 def report_page(c: Canvas, doc):
     c.saveState()
+    DrawLogo(c)
     c.setFillColor(colors.black)
     c.setFont(song, 30)
-    c.drawCentredString(PAGE_WIDTH / 2.0, PAGE_HEIGHT - 80, "AI医疗诊断报告")
+    c.drawCentredString(PAGE_WIDTH / 2.0, PAGE_HEIGHT - 95, "AI医疗诊断报告")
     c.setFont(song, 12)
     c.drawString(80, PAGE_HEIGHT - 120, f"日期: {report_date}")
     c.drawString(80, PAGE_HEIGHT - 140, "报告编号: 001")
@@ -75,6 +76,7 @@ def myLaterPages(c: Canvas, doc):
     :return:
     """
     c.saveState()
+    DrawLogo(c)
     DrawPageHead(c)
     DrawPageFoot(c)
     c.restoreState()
@@ -93,6 +95,14 @@ def DrawPageHead(c: Canvas):
     c.line(30, PAGE_HEIGHT - 60, PAGE_WIDTH - 30, PAGE_HEIGHT - 60)
 
 
+def DrawLogo(c: Canvas):
+    c.drawImage("xiaohui.jpg", 30, PAGE_HEIGHT - 46.5, width=25, height=25, mask='auto')
+    yuanhui_width = 120
+    yuanhui_height = yuanhui_width * 0.25136
+    c.drawImage("yuanhui.png", 58, PAGE_HEIGHT - 50, width=yuanhui_width, height=yuanhui_height,
+                mask='auto')
+
+
 def DrawPageFoot(c: Canvas, date=datetime.date.today):
     """绘制页脚"""
     # 设置边框颜色
@@ -103,8 +113,7 @@ def DrawPageFoot(c: Canvas, date=datetime.date.today):
     c.setFont(song, 8)
     c.setFillColor(colors.black)
     c.drawString(30, PAGE_HEIGHT - 810, f"报告生成日期：{report_date}，Health_AI提供技术支持")
-    image_height = 15
-    c.drawImage("aliyun.png", 435, PAGE_HEIGHT - 814, width=image_height*3.25, height=image_height, mask='auto')
+    c.drawString(250, PAGE_HEIGHT - 810, "联系地址：浙江省杭州市钱塘区浙江理工大学")
     c.drawString(490, PAGE_HEIGHT - 810, "8H16G_ECS_Supported")
 
 
@@ -119,9 +128,9 @@ data = [
     ['诊断项', '值', '说明'],
     ['预测疾病阶段', '3', '预测为疾病的第3阶段'],
     ['准确率', '85%', '预测的整体准确率'],
-    ['精确度', '88%', '实际为正的比例'],
-    ['召回率', '80%', '被正确预测为正的比例'],
-    ['F1分数', '84%', '模型的综合表现']
+    # ['精确度', '88%', '实际为正的比例'],
+    # ['召回率', '80%', '被正确预测为正的比例'],
+    # ['F1分数', '84%', '模型的综合表现']
 ]
 
 # 设置表格样式
@@ -150,7 +159,7 @@ images_per_row = 1  # 每行1张图片
 table_data = []
 
 # 添加图片和描述
-for img_path, desc in zip(images, descriptions):
+for index, (img_path, desc) in enumerate(zip(images, descriptions)):
     # 加载图片并调整大小
     img = PILImage.open(img_path)
     aspect_ratio = img.width / img.height
@@ -165,6 +174,31 @@ for img_path, desc in zip(images, descriptions):
     # 将图片和描述一起作为一个单元格添加到行中
     row = [cell_content]
     table_data.append(row)
+
+    # 在第一张图片下面插入一个表格
+    if index == 0:
+        # 定义表格数据
+        additional_table_data = [
+            ['网络图节点数量', '网络图边数量', '模块数量'],
+            ['38469', '78564', '60']
+        ]
+
+        # 创建表格
+        additional_table = Table(additional_table_data)
+        additional_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, -1), song),
+            ('FONTSIZE', (0, 0), (-1, -1), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+
+        # 将表格添加到报告中
+        table_data.append([additional_table])
+
 
 # 使用 Table 来生成表格布局
 image_table = Table(table_data)
