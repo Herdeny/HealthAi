@@ -9,35 +9,37 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 
+# model_path = "../../../model/"
+# data_path = "../../../data/"
 model_path = sys.argv[1]
 data_path = sys.argv[2]
-print("开始加载模块信息...")
+print("开始加载模块信息...", flush=True)
 module_info = pd.read_excel(data_path + "模块信息.xlsx")
-print("模块信息已加载。")
+print("模块信息已加载。", flush=True)
 # print(module_info)
 
 module_gene = module_info[['Symbol','WGCNA\nModule|color|kME\nSort Vector']]
-print("筛选出 'Symbol' 和 'WGCNA\nModule|color|kME\nSort Vector' 列。")
+print("筛选出 'Symbol' 和 'WGCNA\nModule|color|kME\nSort Vector' 列。", flush=True)
 # print(module_gene)
 
 module_gene.dropna(inplace=True)
-print("已移除缺失值。")
+print("已移除缺失值。", flush=True)
 # print(module_gene)
 
 module_gene[['Module']] = module_gene['WGCNA\nModule|color|kME\nSort Vector'].str.split('|', expand=True)[[0]]
-print("模块信息拆分完成。")
+print("模块信息拆分完成。", flush=True)
 # print(module_gene)
 
 module_gene.drop(['WGCNA\nModule|color|kME\nSort Vector'], axis=1, inplace=True)
-print("已删除不必要的列。")
+print("已删除不必要的列。", flush=True)
 # print(module_gene)
 
 module_gene = module_gene[module_gene['Module'].str.startswith('M')]
-print("仅保留以 'M' 开头的模块。")
+print("仅保留以 'M' 开头的模块。", flush=True)
 # print(module_gene)
 
 module_gene.drop_duplicates(subset=['Symbol'], inplace=True)
-print("已移除重复的基因符号。")
+print("已移除重复的基因符号。", flush=True)
 # print(module_gene)
 
 M1 = module_gene[module_gene['Module'].str.startswith('M1 ')]['Symbol'].tolist()
@@ -144,20 +146,20 @@ for i in range(len(M)):
     for j in range(len(M[i])):
         l_dic[M[i][j]]='M'+str(i+1)
 # print(l_dic)
-print("基因与模块的映射字典已创建。")
+print("基因与模块的映射字典已创建。", flush=True)
 # print(len(l_dic))
-print(f"模块数量: {len(l_dic)}个基因被分配到 {len(M)} 个模块。")
+print(f"模块数量: {len(l_dic)}个基因被分配到 {len(M)} 个模块。", flush=True)
 
 ## 原代码（使用共表达网络）
 ## edge保存的是边信息，node保存的是节点信息
 edge = pd.read_csv(data_path + "braak_3.csv.edges.txt", sep='\t')
 node = pd.read_csv(data_path + "braak_3.csv.nodes.txt", sep='\t')
-print("边信息和节点信息已加载。")
+print("边信息和节点信息已加载。", flush=True)
 
 ## 如果使用基因调控网络，则需要根据tsv文件读取结果
 ## tsv文件的一行有三个数据，表示一条边，TF是边的调控节点，target是边的目标节点
 b_3 = pd.read_csv(data_path + "adj_braak3.tsv",sep='\t')
-print("基因调控网络数据已读取。")
+print("基因调控网络数据已读取。", flush=True)
 
 node_list = []
 for i in range(44):
@@ -166,19 +168,19 @@ for i in range(44):
         if j in M[i]:
             l.append(j)
     node_list.append(l)
-    print(f"M{i + 1} 模块包含的节点数量: {len(l)}")
+    print(f"M{i + 1} 模块包含的节点数量: {len(l)}", flush=True)
 
 ed = edge.values
 ed = ed[:,:3]
 # print(len(ed))
-print(f"总边数: {len(ed)}")
+print(f"总边数: {len(ed)}", flush=True)
 
 ed_n = []
 for i in range(len(ed)):
     if ed[i][2]>=0.67:
         ed_n.append(ed[i])
 # print(len(ed_n))
-print(f"边权重大于0.67的边数量: {len(ed_n)}")
+print(f"边权重大于0.67的边数量: {len(ed_n)}", flush=True)
 
 edge_node = []
 for i in range(44):
@@ -190,15 +192,15 @@ for j in range(len(ed_n)):
         if (ed_n[j][0] in node_list[i]) and (ed_n[j][1] in node_list[i]):
             edge_node[i].append(ed_n[j].tolist())
 
-print("开始创建网络图...")
+print("开始创建网络图...", flush=True)
 G = nx.Graph()
 for i in range(44):
     # G.add_edges_from([(e[0], e[1], {'weight': e[2]}) for e in edge_node[i]])
     for e in edge_node[i]:  # 遍历每个模块的边
         G.add_edge(e[0], e[1], weight=e[2])  # 添加边
-        print(f"添加边: {e[0]} -> {e[1]}, 权重: {e[2]:.2f}")  # 输出边的信息
+        print(f"添加边: {e[0]} -> {e[1]}, 权重: {e[2]:.2f}", flush=True)  # 输出边的信息
 
-print("正在添加节点...")
+print("正在添加节点...", flush=True)
 for i in range(44):
     G.add_nodes_from(node_list[i])
 
@@ -207,7 +209,7 @@ widths = nx.get_edge_attributes(G, 'weight')
 for key in widths:
     widths[key] = 10 * widths[key]
 
-print("正在布局节点...")
+print("正在布局节点...", flush=True)
 nodelist = G.nodes()
 
 pos = nx.spring_layout(G, k=0.15)
@@ -230,20 +232,20 @@ for node_color, nodelist in nodes.items():
                            node_color=node_color,
                            alpha=0.9)
 
-print("正在绘制边...")
+print("正在绘制边...", flush=True)
 nx.draw_networkx_edges(G, pos,
                        edgelist=widths.keys(),
                        width=0.1,
                        edge_color='#808080',
                        alpha=0.7)
 
-print("正在保存图像...")
+print("正在保存图像...", flush=True)
 plt.savefig(data_path + "GRN.png", format="PNG", dpi=250, bbox_inches='tight', pad_inches=0)
-print("图像已保存")
+print("图像已保存", flush=True)
 
 # 输出节点、边和模块的数量
-print("网络图节点数量:", G.number_of_nodes())
-print("网络图边数量:", G.number_of_edges())
-print("模块数量:", len(M))
+print("网络图节点数量:", G.number_of_nodes(), flush=True)
+print("网络图边数量:", G.number_of_edges(), flush=True)
+print("模块数量:", len(M), flush=True)
 
 plt.show()
