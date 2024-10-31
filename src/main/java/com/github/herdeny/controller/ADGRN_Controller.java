@@ -11,7 +11,7 @@ import java.io.File;
 
 @RestController
 @RequestMapping("/adgrn")
-public class ADGRN_Controller extends CommonController{
+public class ADGRN_Controller extends CommonController {
 
     @Autowired
     private ADGRN_Service adgrnService;
@@ -29,44 +29,45 @@ public class ADGRN_Controller extends CommonController{
     }
 
     @PostMapping("/run")
-    public Result run(@RequestParam String fileName) {
-        String filePath = DATA_PATH + "/" + fileName;
-        String loom_filePath = adgrnService.adgrn_createLoom(filePath);
-        adgrnService.adgrn_createTSV(loom_filePath);
-        adgrnService.adgrn_createImg("adj.tsv");
-        return Result.success(null);
+    public Result run(@RequestParam String fileName, String uid) {
+        String filePath = DATA_PATH + fileName;
+        String loom_filePath = adgrnService.adgrn_createLoom(filePath, uid);
+        adgrnService.adgrn_createTSV(loom_filePath, uid);
+        adgrnService.adgrn_createImg("adj.tsv", uid);
+        return Result.success("complete create adj.tsv");
     }
 
 
     @PostMapping("/loom")
-    public Result loom(String filePath) {
-        String loom_filePath = adgrnService.adgrn_createLoom(filePath);
+    public Result loom(@RequestParam String filePath, String uid) {
+        String loom_filePath = adgrnService.adgrn_createLoom(filePath, uid);
         return Result.success(loom_filePath);
     }
 
     @PostMapping("/tsv")
-    public Result tsv(String filePath) {
-        int returnCode = adgrnService.adgrn_createTSV(filePath);
+    public Result tsv(@RequestParam String filePath, String uid) {
+        int returnCode = adgrnService.adgrn_createTSV(filePath, uid);
         if (returnCode != 0) {
-            return Result.error(returnCode,"TSV生成失败");
+            return Result.error(returnCode, "TSV生成失败");
         }
         return Result.success(returnCode);
     }
 
 
     @PostMapping("/img")
-    public Result img(String filePath) {
-        adgrnService.adgrn_createImg(filePath);
+    public Result img(@RequestParam String filePath, String uid) {
+        adgrnService.adgrn_createImg(filePath, uid);
         return Result.success();
     }
 
     /**
      * 获取GRN图
+     *
      * @param response
      */
     @GetMapping("/getGRN")
     public void getAvatar(HttpServletResponse response) {
-        String GRNFolderPath = DATA_PATH + "/GRN.png";
+        String GRNFolderPath = DATA_PATH + "GRN.png";
         // 判断GRN路径是否存在
         while (!new File(GRNFolderPath).exists()) {
             return;

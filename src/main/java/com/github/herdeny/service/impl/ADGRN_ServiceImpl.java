@@ -50,8 +50,10 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
     private SseClient sseClient;
 
     @Override
-    public String adgrn_createLoom(String filePath) {
+    public String adgrn_createLoom(String filePath, String uid) {
         System.out.println("Start Generate Loom...");
+        sseClient.sendMessage(uid, uid + "-start-create-loom", "Start Generate Loom...");
+
 
         String[] args1 = new String[]{pythonPath, CREATE_LOOM_PATH, filePath};
 
@@ -64,6 +66,7 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
             String actionStr;
             if ((actionStr = in.readLine()) != null) {
                 System.out.println("Completed Generate Loom");
+                sseClient.sendMessage(uid, uid + "-end-create-loom", "Completed Generate Loom");
                 return actionStr;
             }
 
@@ -82,8 +85,9 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
     }
 
     @Override
-    public void adgrn_createImg(String filePath) {
+    public void adgrn_createImg(String filePath, String uid) {
         System.out.println("Start Generate Image...");
+        sseClient.sendMessage(uid, uid + "-start-create-img", "Start Generate Image...");
 
         String[] args1 = new String[]{pythonPath, CREATE_IMG_PATH, filePath};
 
@@ -96,6 +100,8 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
             String actionStr;
             while ((actionStr = in.readLine()) != null) {
                 System.out.println(actionStr);
+                String messageID = uid + "-" + UUID.randomUUID();
+                sseClient.sendMessage(uid, messageID, actionStr);
             }
 
             String errorStr;
@@ -109,10 +115,13 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
             throw new RuntimeException(e);
         }
         System.out.println("Complete Generate Image");
+        sseClient.sendMessage(uid, uid + "-end-create-img", "Complete Generate Image");
     }
 
-    public int adgrn_createTSV(String filePath) {
+    public int adgrn_createTSV(String filePath, String uid) {
         System.out.println("Start Generate TSV...");
+        sseClient.sendMessage(uid, uid + "-start-create-tsv", "Start Generate TSV...");
+
         try {
             // Build the command
             ProcessBuilder processBuilder = new ProcessBuilder(
@@ -133,6 +142,8 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
             String line;
             while ((line = reader.readLine()) != null) {
                 System.out.println(line);
+                String messageID = uid + "-" + UUID.randomUUID();
+                sseClient.sendMessage(uid, messageID, line);
             }
 
             // Wait for the process to finish
@@ -148,13 +159,14 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
             e.printStackTrace();
         }
         System.out.println("Complete Generate TSV");
+        sseClient.sendMessage(uid,uid + "-end-create-tsv","Complete Generate TSV");
         return 0;
     }
 
     @Override
     public void adgrn_test(String uid) {
         System.out.println("Test-Start Generate Image...");
-        sseClient.sendMessage(uid, "start", "Start Generate Image...");
+        sseClient.sendMessage(uid, uid + "-start-adgrn-test", "Start Generate Image...");
 
         String[] args1 = new String[]{pythonPath, CREATE_ADGRN_COMPLEX_PATH, MODEL_PATH, DATA_PATH};
 
@@ -167,9 +179,8 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
             String actionStr;
             while ((actionStr = in.readLine()) != null) {
                 System.out.println(actionStr);
-                String messageId = UUID.randomUUID().toString();
+                String messageId = uid + "-" + UUID.randomUUID();
                 sseClient.sendMessage(uid, messageId, actionStr);
-
             }
 
             String errorStr;
@@ -183,7 +194,7 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
             throw new RuntimeException(e);
         }
         System.out.println("Test-Complete Generate Image");
-        sseClient.sendMessage(uid, "end", "Complete Generate Image");
+        sseClient.sendMessage(uid, uid + "-end-create-image-test", "Complete Generate Image");
     }
 }
 
