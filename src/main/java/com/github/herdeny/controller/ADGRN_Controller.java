@@ -3,6 +3,8 @@ package com.github.herdeny.controller;
 import com.github.herdeny.pojo.Result;
 import com.github.herdeny.service.ADGRN_Service;
 import jakarta.servlet.http.HttpServletResponse;
+import org.beetl.ext.fn.Json;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +26,8 @@ public class ADGRN_Controller extends CommonController {
 
     @PostMapping("/test")
     public Result Test(@RequestParam String uid) {
-        adgrnService.adgrn_test(uid);
-        return Result.success("ok");
+        JSONObject result_json = adgrnService.adgrn_test(uid);
+        return Result.success(result_json);
     }
 
     @PostMapping("/run")

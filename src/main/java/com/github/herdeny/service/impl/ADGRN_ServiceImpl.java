@@ -2,6 +2,7 @@ package com.github.herdeny.service.impl;
 
 import com.github.herdeny.service.ADGRN_Service;
 import com.github.herdeny.utils.SseClient;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -164,7 +165,8 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
     }
 
     @Override
-    public void adgrn_test(String uid) {
+    public JSONObject adgrn_test(String uid) {
+        JSONObject result = new JSONObject();
         System.out.println("Test-Start Generate Image...");
         sseClient.sendMessage(uid, uid + "-start-adgrn-test", "Start Generate Image...");
 
@@ -179,6 +181,15 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
             String actionStr;
             while ((actionStr = in.readLine()) != null) {
                 System.out.println(actionStr);
+                if (actionStr.startsWith("网络图节点数量：")){
+                    result.put("网络图节点数量", actionStr.split("：")[1].trim());
+                }
+                if (actionStr.startsWith("网络图边数量：")){
+                    result.put("网络图边数量", actionStr.split("：")[1].trim());
+                }
+                if (actionStr.startsWith("模块数量：")){
+                    result.put("模块数量", actionStr.split("：")[1].trim());
+                }
                 String messageId = uid + "-" + UUID.randomUUID();
                 sseClient.sendMessage(uid, messageId, actionStr);
             }
@@ -195,6 +206,7 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
         }
         System.out.println("Test-Complete Generate Image");
         sseClient.sendMessage(uid, uid + "-end-create-image-test", "Complete Generate Image");
+        return result;
     }
 }
 
