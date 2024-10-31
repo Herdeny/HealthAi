@@ -2,6 +2,7 @@ package com.github.herdeny.service.impl;
 
 import com.github.herdeny.service.ADGRN_Service;
 import com.github.herdeny.utils.SseClient;
+import com.github.herdeny.utils.JsonTools;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +12,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
+import java.util.*;
 
 
 @Service
@@ -167,6 +168,7 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
     @Override
     public JSONObject adgrn_test(String uid) {
         JSONObject result = new JSONObject();
+
         System.out.println("Test-Start Generate Image...");
         sseClient.sendMessage(uid, uid + "-start-adgrn-test", "Start Generate Image...");
 
@@ -181,14 +183,14 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
             String actionStr;
             while ((actionStr = in.readLine()) != null) {
                 System.out.println(actionStr);
-                if (actionStr.startsWith("网络图节点数量：")){
-                    result.put("网络图节点数量", actionStr.split("：")[1].trim());
+                if (actionStr.startsWith("网络图节点数量:")){
+                    result.put("网络图节点数量", actionStr.split(":")[1].trim());
                 }
-                if (actionStr.startsWith("网络图边数量：")){
-                    result.put("网络图边数量", actionStr.split("：")[1].trim());
+                if (actionStr.startsWith("网络图边数量:")){
+                    result.put("网络图边数量", actionStr.split(":")[1].trim());
                 }
-                if (actionStr.startsWith("模块数量：")){
-                    result.put("模块数量", actionStr.split("：")[1].trim());
+                if (actionStr.startsWith("模块数量:")){
+                    result.put("模块数量", actionStr.split(":")[1].trim());
                 }
                 String messageId = uid + "-" + UUID.randomUUID();
                 sseClient.sendMessage(uid, messageId, actionStr);
@@ -206,6 +208,9 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
         }
         System.out.println("Test-Complete Generate Image");
         sseClient.sendMessage(uid, uid + "-end-create-image-test", "Complete Generate Image");
+        JsonTools jsonTools = new JsonTools();
+        jsonTools.saveJsonToFile(result, DATA_PATH + "result.json");
+        System.out.println("result.json saved");
         return result;
     }
 }

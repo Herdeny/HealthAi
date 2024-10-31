@@ -3,13 +3,14 @@ package com.github.herdeny.controller;
 import com.github.herdeny.pojo.Result;
 import com.github.herdeny.service.ADGRN_Service;
 import jakarta.servlet.http.HttpServletResponse;
-import org.beetl.ext.fn.Json;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/adgrn")
@@ -25,9 +26,14 @@ public class ADGRN_Controller extends CommonController {
 
 
     @PostMapping("/test")
-    public Result Test(@RequestParam String uid) {
+    public Result<Map<String, Object>> Test(@RequestParam String uid) {
         JSONObject result_json = adgrnService.adgrn_test(uid);
-        return Result.success(result_json);
+        System.out.println(result_json);
+
+        // 将 JSONObject 转换为 Map
+        Map<String, Object> map = result_json.toMap();
+
+        return Result.success(map);
     }
 
     @PostMapping("/run")
