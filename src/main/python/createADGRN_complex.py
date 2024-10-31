@@ -148,7 +148,7 @@ for i in range(len(M)):
 # print(l_dic)
 print("基因与模块的映射字典已创建。", flush=True)
 # print(len(l_dic))
-print(f"模块数量: {len(l_dic)}个基因被分配到 {len(M)} 个模块。", flush=True)
+print(f"{len(l_dic)}个基因被分配到 {len(M)} 个模块。", flush=True)
 
 ## 原代码（使用共表达网络）
 ## edge保存的是边信息，node保存的是节点信息
@@ -198,7 +198,7 @@ for i in range(44):
     # G.add_edges_from([(e[0], e[1], {'weight': e[2]}) for e in edge_node[i]])
     for e in edge_node[i]:  # 遍历每个模块的边
         G.add_edge(e[0], e[1], weight=e[2])  # 添加边
-        print(f"添加边: {e[0]} -> {e[1]}, 权重: {e[2]:.2f}", flush=True)  # 输出边的信息
+        # print(f"添加边: {e[0]} -> {e[1]}, 权重: {e[2]:.2f}", flush=True)  # 输出边的信息
 
 print("正在添加节点...", flush=True)
 for i in range(44):
@@ -247,5 +247,3 @@ print("图像已保存", flush=True)
 print("网络图节点数量:", G.number_of_nodes(), flush=True)
 print("网络图边数量:", G.number_of_edges(), flush=True)
 print("模块数量:", len(M), flush=True)
-
-plt.show()
