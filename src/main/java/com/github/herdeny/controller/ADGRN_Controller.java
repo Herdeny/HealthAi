@@ -2,6 +2,7 @@ package com.github.herdeny.controller;
 
 import com.github.herdeny.pojo.Result;
 import com.github.herdeny.service.ADGRN_Service;
+import com.github.herdeny.utils.JsonTools;
 import jakarta.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -24,32 +24,50 @@ public class ADGRN_Controller extends CommonController {
 
     System.Logger logger = System.getLogger(ADGRN_Controller.class.getName());
 
-
-    @PostMapping("/test")
-    public Result<Map<String, Object>> Test(@RequestParam String uid) {
-        JSONObject result_json = adgrnService.adgrn_test(uid);
-        System.out.println(result_json);
-
-        // 将 JSONObject 转换为 Map
-        Map<String, Object> map = result_json.toMap();
-
-        return Result.success(map);
-    }
+//    @PostMapping("/test")
+//    public Result<Map<String, Object>> Test(@RequestParam String uid) {
+//        JSONObject result_json = adgrnService.adgrn_test(uid);
+//        if (result_json == null) {
+//            return Result.error(500, "Test failed");
+//        }
+//        System.out.println(result_json);
+//
+//        // 将 JSONObject 转换为 Map
+//        Map<String, Object> map = result_json.toMap();
+//
+//        return Result.success(map);
+//    }
 
     @PostMapping("/run")
-    public Result run(@RequestParam String fileName, String uid) {
+    public Result<Map<String, Object>> run(@RequestParam String fileName, String uid) {
         String filePath = DATA_PATH + fileName;
-        String loom_filePath = adgrnService.adgrn_createLoom(filePath, uid);
-        adgrnService.adgrn_createTSV(loom_filePath, uid);
-        adgrnService.adgrn_createImg("adj.tsv", uid);
-        return Result.success("complete create adj.tsv");
+        if (!adgrnService.adgrn_createLoom(filePath, uid)) {
+            return Result.error(500, "loom文件生成失败");
+        }
+        String loom_filePath = filePath.substring(0, filePath.lastIndexOf(".")) + ".loom";
+        if (adgrnService.adgrn_createTSV(loom_filePath, uid) != 0) {
+            return Result.error(500, "TSV生成失败");
+        }
+        JSONObject result_json = adgrnService.adgrn_createImg("adj.tsv", uid);
+        if (result_json == null) {
+            return Result.error(500, "绘图数据为空");
+        }
+        System.out.println("返回绘图数据文件：" + result_json);
+        JsonTools jsonTools = new JsonTools();
+        jsonTools.saveJsonToFile(result_json, DATA_PATH + "result.json");
+        System.out.println("result.json saved");
+        // 将 JSONObject 转换为 Map
+        Map<String, Object> map = result_json.toMap();
+        return Result.success(map);
     }
 
 
     @PostMapping("/loom")
     public Result loom(@RequestParam String filePath, String uid) {
-        String loom_filePath = adgrnService.adgrn_createLoom(filePath, uid);
-        return Result.success(loom_filePath);
+        boolean flag = adgrnService.adgrn_createLoom(filePath, uid);
+        if (!flag)
+            return Result.error(500, "loom文件生成失败");
+        return Result.success("loom文件生成成功");
     }
 
     @PostMapping("/tsv")
@@ -63,9 +81,16 @@ public class ADGRN_Controller extends CommonController {
 
 
     @PostMapping("/img")
-    public Result img(@RequestParam String filePath, String uid) {
-        adgrnService.adgrn_createImg(filePath, uid);
-        return Result.success();
+    public Result<Map<String, Object>> img(@RequestParam String filePath, String uid) {
+        JSONObject result_json = adgrnService.adgrn_createImg(filePath, uid);
+        if (result_json == null) {
+            return Result.error(500, "绘图数据为空");
+        }
+        System.out.println(result_json);
+
+        // 将 JSONObject 转换为 Map
+        Map<String, Object> map = result_json.toMap();
+        return Result.success(map);
     }
 
     /**
@@ -77,7 +102,7 @@ public class ADGRN_Controller extends CommonController {
     public void getAvatar(HttpServletResponse response) {
         String GRNFolderPath = DATA_PATH + "GRN.png";
         // 判断GRN路径是否存在
-        while (!new File(GRNFolderPath).exists()) {
+        if (!new File(GRNFolderPath).exists()) {
             return;
         }
         response.setContentType("image/png");

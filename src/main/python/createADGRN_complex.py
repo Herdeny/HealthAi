@@ -1,6 +1,7 @@
 import io
 import sys
 
+
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
@@ -13,8 +14,9 @@ import matplotlib.pyplot as plt
 # data_path = "../../../data/"
 model_path = sys.argv[1]
 data_path = sys.argv[2]
+fileName = sys.argv[3]
 print("开始加载模块信息...", flush=True)
-module_info = pd.read_excel(data_path + "模块信息.xlsx")
+module_info = pd.read_excel(model_path + "模块信息.xlsx")
 print("模块信息已加载。", flush=True)
 # print(module_info)
 
@@ -152,14 +154,18 @@ print(f"{len(l_dic)}个基因被分配到 {len(M)} 个模块。", flush=True)
 
 ## 原代码（使用共表达网络）
 ## edge保存的是边信息，node保存的是节点信息
-edge = pd.read_csv(data_path + "braak_3.csv.edges.txt", sep='\t')
-node = pd.read_csv(data_path + "braak_3.csv.nodes.txt", sep='\t')
-print("边信息和节点信息已加载。", flush=True)
+# edge = pd.read_csv(data_path + "braak_3.csv.edges.txt", sep='\t')
+# node = pd.read_csv(data_path + "braak_3.csv.nodes.txt", sep='\t')
+# print("边信息和节点信息已加载。", flush=True)
 
 ## 如果使用基因调控网络，则需要根据tsv文件读取结果
 ## tsv文件的一行有三个数据，表示一条边，TF是边的调控节点，target是边的目标节点
-b_3 = pd.read_csv(data_path + "adj_braak3.tsv",sep='\t')
+b_3 = pd.read_csv(data_path + fileName, sep='\t')
 print("基因调控网络数据已读取。", flush=True)
+
+edge = b_3
+# 取第一列和第二列并集
+node = pd.DataFrame(list(set(list(edge['TF']) + list(edge['target']))), columns=['nodeName'])
 
 node_list = []
 for i in range(44):

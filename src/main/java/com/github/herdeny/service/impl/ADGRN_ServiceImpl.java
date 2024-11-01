@@ -52,7 +52,8 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
     private SseClient sseClient;
 
     @Override
-    public String adgrn_createLoom(String filePath, String uid) {
+    public boolean adgrn_createLoom(String filePath, String uid) {
+        boolean flag = true;
         System.out.println("Start Generate Loom...");
         sseClient.sendMessage(uid, uid + "-start-create-loom", "Start Generate Loom...");
 
@@ -65,40 +66,7 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
             BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
             BufferedReader err = new BufferedReader(new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8));
 
-            String actionStr;
-            if ((actionStr = in.readLine()) != null) {
-                System.out.println("Completed Generate Loom");
-                sseClient.sendMessage(uid, uid + "-end-create-loom", "Completed Generate Loom");
-                return actionStr;
-            }
-
-            String errorStr;
-            while ((errorStr = err.readLine()) != null) {
-                System.err.println(errorStr);
-            }
-
-            in.close();
-            err.close();
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        return null;
-    }
-
-    @Override
-    public void adgrn_createImg(String filePath, String uid) {
-        System.out.println("Start Generate Image...");
-        sseClient.sendMessage(uid, uid + "-start-create-img", "Start Generate Image...");
-
-        String[] args1 = new String[]{pythonPath, CREATE_IMG_PATH, DATA_PATH, filePath};
-
-        try {
-            Process process = Runtime.getRuntime().exec(args1);
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
-            BufferedReader err = new BufferedReader(new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8));
-
+            // Read the output
             String actionStr;
             while ((actionStr = in.readLine()) != null) {
                 System.out.println(actionStr);
@@ -108,16 +76,17 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
 
             String errorStr;
             while ((errorStr = err.readLine()) != null) {
+                if (flag) flag = false;
                 System.err.println(errorStr);
             }
+
             in.close();
             err.close();
             process.waitFor();
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
-        System.out.println("Complete Generate Image");
-        sseClient.sendMessage(uid, uid + "-end-create-img", "Complete Generate Image");
+        return flag;
     }
 
     public int adgrn_createTSV(String filePath, String uid) {
@@ -142,7 +111,7 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
             // Read the output
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
-            while ((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null && line.contains("INFO")) {
                 System.out.println(line);
                 String messageID = uid + "-" + UUID.randomUUID();
                 sseClient.sendMessage(uid, messageID, line);
@@ -166,13 +135,13 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
     }
 
     @Override
-    public JSONObject adgrn_test(String uid) {
+    public JSONObject adgrn_createImg(String filePath, String uid) {
         JSONObject result = new JSONObject();
 
-        System.out.println("Test-Start Generate Image...");
-        sseClient.sendMessage(uid, uid + "-start-adgrn-test", "Start Generate Image...");
+        System.out.println("Start Generate Image...");
+        sseClient.sendMessage(uid, uid + "-start-adgrn", "Start Generate Image...");
 
-        String[] args1 = new String[]{pythonPath, CREATE_ADGRN_COMPLEX_PATH, MODEL_PATH, DATA_PATH};
+        String[] args1 = new String[]{pythonPath, CREATE_ADGRN_COMPLEX_PATH, MODEL_PATH, DATA_PATH, filePath};
 
         try {
             Process process = Runtime.getRuntime().exec(args1);
@@ -206,11 +175,8 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
-        System.out.println("Test-Complete Generate Image");
-        sseClient.sendMessage(uid, uid + "-end-create-image-test", "Complete Generate Image");
-        JsonTools jsonTools = new JsonTools();
-        jsonTools.saveJsonToFile(result, DATA_PATH + "result.json");
-        System.out.println("result.json saved");
+        System.out.println("Complete Generate Image");
+        sseClient.sendMessage(uid, uid + "-end-create-image", "Complete Generate Image");
         return result;
     }
 }

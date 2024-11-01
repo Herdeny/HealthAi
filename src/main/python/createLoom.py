@@ -8,9 +8,9 @@ import scanpy as sc
 import loompy as lp
 import numpy as np
 
-# file_path = sys.argv[1]
-data_path = sys.argv[1]
-file_path = data_path + "ACT_377_4830.csv"
+file_path = sys.argv[1]
+# data_path = sys.argv[1]
+# file_path = data_path + "ACT_377_4830.csv"
 # # 使用 sc.read_csv 读取文件
 x = sc.read_csv(file_path)
 
@@ -21,4 +21,4 @@ if file_path.endswith('.csv'):
 row_attrs = {"Gene": np.array(x.var_names)}
 col_attrs = {"CellID": np.array(x.obs_names)}
 lp.create(file_path + ".loom", x.X.transpose(), row_attrs, col_attrs)
-print(file_path + ".loom")
+print("loom文件绘图完成，已保存：" + file_path + ".loom")
