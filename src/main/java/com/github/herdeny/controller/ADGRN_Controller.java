@@ -99,7 +99,7 @@ public class ADGRN_Controller extends CommonController {
      * @param response
      */
     @GetMapping("/getGRN")
-    public void getAvatar(HttpServletResponse response) {
+    public void getGRN(HttpServletResponse response) {
         String GRNFolderPath = DATA_PATH + "GRN.png";
         // 判断GRN路径是否存在
         if (!new File(GRNFolderPath).exists()) {
