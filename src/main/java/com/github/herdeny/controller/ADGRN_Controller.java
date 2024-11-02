@@ -22,21 +22,10 @@ public class ADGRN_Controller extends CommonController {
     @Value("${DATA_PATH}")
     private String DATA_PATH;
 
-    System.Logger logger = System.getLogger(ADGRN_Controller.class.getName());
-
-//    @PostMapping("/test")
-//    public Result<Map<String, Object>> Test(@RequestParam String uid) {
-//        JSONObject result_json = adgrnService.adgrn_test(uid);
-//        if (result_json == null) {
-//            return Result.error(500, "Test failed");
-//        }
-//        System.out.println(result_json);
-//
-//        // 将 JSONObject 转换为 Map
-//        Map<String, Object> map = result_json.toMap();
-//
-//        return Result.success(map);
-//    }
+    @PostMapping("/test")
+    public Result<Map<String, Object>> Test(@RequestParam String uid) {
+        return run("ACT_377_4830.csv", uid);
+    }
 
     @PostMapping("/run")
     public Result<Map<String, Object>> run(@RequestParam String fileName, String uid) {
@@ -63,7 +52,7 @@ public class ADGRN_Controller extends CommonController {
 
 
     @PostMapping("/loom")
-    public Result loom(@RequestParam String filePath, String uid) {
+    public Result<String> loom(@RequestParam String filePath, String uid) {
         boolean flag = adgrnService.adgrn_createLoom(filePath, uid);
         if (!flag)
             return Result.error(500, "loom文件生成失败");
@@ -71,7 +60,7 @@ public class ADGRN_Controller extends CommonController {
     }
 
     @PostMapping("/tsv")
-    public Result tsv(@RequestParam String filePath, String uid) {
+    public Result<Integer> tsv(@RequestParam String filePath, String uid) {
         int returnCode = adgrnService.adgrn_createTSV(filePath, uid);
         if (returnCode != 0) {
             return Result.error(returnCode, "TSV生成失败");
@@ -95,8 +84,6 @@ public class ADGRN_Controller extends CommonController {
 
     /**
      * 获取GRN图
-     *
-     * @param response
      */
     @GetMapping("/getGRN")
     public void getGRN(HttpServletResponse response) {
