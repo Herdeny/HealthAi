@@ -33,7 +33,7 @@ public class PredictedLabelsController {
     private PredictedLabelsService predictedLabelsService;
 
     @Value("${DATA_PATH}")
-    private String DIRECTORY;
+    private String DATA_PATH;
 
     @Value("${TEST_DATA1_PATH}")
     private String TEST_DATA1_PATH;
@@ -45,12 +45,12 @@ public class PredictedLabelsController {
 
     @PostMapping("/run")
     public Result run(@RequestParam String fileName) {
-        String result = predictedLabelsService.predict(fileName);
+        String result = DATA_PATH + predictedLabelsService.predict(fileName);
         return Result.success(result);
     }
 
     @GetMapping("/test1/name")
-    public Result getTest1Name(){
+    public Result<String[]> getTest1Name(){
         // 创建一个 File 对象以指向 TEST_DATA1_PATH 路径
         File directory = new File(TEST_DATA1_PATH);
         // 检查路径是否存在且是一个目录
@@ -67,7 +67,7 @@ public class PredictedLabelsController {
     }
 
     @GetMapping("/test2/name")
-    public Result getTest2Name(){
+    public Result<String[]> getTest2Name(){
         // 创建一个 File 对象以指向 TEST_DATA2_PATH 路径
         File directory = new File(TEST_DATA2_PATH);
         // 检查路径是否存在且是一个目录

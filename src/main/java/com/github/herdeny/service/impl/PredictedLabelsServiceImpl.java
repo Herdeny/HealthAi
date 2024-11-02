@@ -1,6 +1,8 @@
 package com.github.herdeny.service.impl;
 
 import com.github.herdeny.service.PredictedLabelsService;
+import com.github.herdeny.utils.SseClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -8,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 
 /**
@@ -46,6 +49,9 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
     @Value("${Cogdx.h5}")
     String best_model_tempro_spatialfusion_Cogdx;
 
+    @Autowired
+    private SseClient sseClient;
+
     /**
      * 疾病阶段预测
      *
@@ -54,9 +60,10 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
     @Override
     public String predict(String filePath) {
         System.out.println("Start Predicting pathological stages...");
+//        sseClient.sendMessage(uid, uid + "-start-predict", "Start Predicting pathological stages...")
 
         System.out.println(dataPath);
-        String[] args1 = new String[]{pythonPath, GeneAnalysisPath, dataPath  + filePath,
+        String[] args1 = new String[]{pythonPath, GeneAnalysisPath, filePath,
                 final_spatial_fusion, label_mapping,
                 best_model_tempro_spatialfusion_Braak,
                 best_model_tempro_spatialfusion_CERAD,
@@ -75,6 +82,8 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
                     String line;
                     while ((line = in.readLine()) != null) {
                         System.out.println(line);
+//                        String messageID = uid +"-" + UUID.randomUUID();
+//                        sseClient.sendMessage(uid,messageID,line);
                         outputBuilder.append(line);
                     }
                 } catch (IOException e) {
