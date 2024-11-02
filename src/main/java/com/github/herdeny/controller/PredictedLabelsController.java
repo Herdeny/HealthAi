@@ -1,19 +1,12 @@
 package com.github.herdeny.controller;
 
-import com.github.herdeny.pojo.Query;
 import com.github.herdeny.pojo.Result;
 import com.github.herdeny.service.PredictedLabelsService;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.Executors;
 
 /**
  * ClassName: PredictedLabelsController
