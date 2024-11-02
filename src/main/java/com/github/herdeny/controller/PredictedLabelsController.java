@@ -45,7 +45,7 @@ public class PredictedLabelsController {
 
     @PostMapping("/run")
     public Result run(@RequestParam String fileName) {
-        String result = DATA_PATH + predictedLabelsService.predict(fileName);
+        String result = predictedLabelsService.predict(DATA_PATH + fileName);
         return Result.success(result);
     }
 
