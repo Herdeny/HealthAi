@@ -111,10 +111,12 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
             // Read the output
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
-            while ((line = reader.readLine()) != null && line.contains("INFO")) {
+            while ((line = reader.readLine()) != null) {
                 System.out.println(line);
-                String messageID = uid + "-" + UUID.randomUUID();
-                sseClient.sendMessage(uid, messageID, line);
+                if (line.contains("INFO")) {
+                    String messageID = uid + "-" + UUID.randomUUID();
+                    sseClient.sendMessage(uid, messageID, line);
+                }
             }
 
             // Wait for the process to finish
