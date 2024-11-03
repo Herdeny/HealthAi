@@ -38,7 +38,7 @@ public class ADGRN_Controller extends CommonController {
             return Result.error(500, "TSV生成失败");
         }
         JSONObject result_json = adgrnService.adgrn_createImg("adj.tsv", uid);
-        if (result_json == null) {
+        if (result_json.isEmpty()) {
             return Result.error(500, "绘图数据为空");
         }
         System.out.println("返回绘图数据文件：" + result_json);
@@ -72,7 +72,7 @@ public class ADGRN_Controller extends CommonController {
     @PostMapping("/img")
     public Result<Map<String, Object>> img(@RequestParam String filePath, String uid) {
         JSONObject result_json = adgrnService.adgrn_createImg(filePath, uid);
-        if (result_json == null) {
+        if (result_json.isEmpty()) {
             return Result.error(500, "绘图数据为空");
         }
         System.out.println(result_json);
