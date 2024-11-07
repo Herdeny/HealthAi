@@ -58,9 +58,9 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
      * @param filePath 用户传入的csv文件路径
      */
     @Override
-    public String predict(String filePath) {
+    public String predict(String filePath, String uid) {
         System.out.println("Start Predicting pathological stages...");
-//        sseClient.sendMessage(uid, uid + "-start-predict", "Start Predicting pathological stages...")
+        sseClient.sendMessage(uid, uid + "-start-predict", "Start Predicting pathological stages...");
 
         System.out.println(dataPath);
         String[] args1 = new String[]{pythonPath, GeneAnalysisPath, filePath,
@@ -71,7 +71,7 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
         };
 
         Process process = null;
-        StringBuilder outputBuilder = new StringBuilder(); // 用于存储Python输出结果
+        String[] result = new String[1];
         try {
             process = Runtime.getRuntime().exec(args1);
 
@@ -82,9 +82,14 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
                     String line;
                     while ((line = in.readLine()) != null) {
                         System.out.println(line);
-//                        String messageID = uid +"-" + UUID.randomUUID();
-//                        sseClient.sendMessage(uid,messageID,line);
-                        outputBuilder.append(line);
+                        if (line.contains("ms/step")){
+                            continue;
+                        }
+                        String messageID = uid +"-" + UUID.randomUUID();
+                        sseClient.sendMessage(uid,messageID,line);
+                        if (line.startsWith("Predicted labels:")) {
+                            result[0] = line.substring(line.lastIndexOf('[') + 1, line.lastIndexOf(']'));
+                        }
                     }
                 } catch (IOException e) {
                     System.err.println("Error reading process output: " + e.getMessage());
@@ -112,8 +117,7 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
             errorThread.join();
 
             if (exitCode == 0) {
-                String result = outputBuilder.toString();
-                return result.substring(result.lastIndexOf('[') + 1, result.lastIndexOf(']'));
+                return result[0];
             } else {
                 System.err.println("Process exited with code: " + exitCode);
                 // 可以根据需要返回不同的结果或抛出异常

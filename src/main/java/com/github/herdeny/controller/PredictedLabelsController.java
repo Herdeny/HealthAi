@@ -37,8 +37,8 @@ public class PredictedLabelsController {
     System.Logger logger = System.getLogger(PredictedLabelsController.class.getName());
 
     @PostMapping("/run")
-    public Result run(@RequestParam String fileName) {
-        String result = predictedLabelsService.predict(DATA_PATH + fileName);
+    public Result<String> run(@RequestParam String fileName, @RequestParam String uid) {
+        String result = predictedLabelsService.predict(DATA_PATH + fileName, uid);
         return Result.success(result);
     }
 

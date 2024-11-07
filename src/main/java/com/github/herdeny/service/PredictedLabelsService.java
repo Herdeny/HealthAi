@@ -13,5 +13,5 @@ package com.github.herdeny.service;
 public interface PredictedLabelsService {
 
     // 预测疾病阶段
-    String predict(String filePath);
+    String predict(String filePath, String uid);
 }
