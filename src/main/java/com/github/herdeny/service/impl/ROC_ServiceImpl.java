@@ -42,6 +42,9 @@ public class ROC_ServiceImpl implements ROC_Service {
                     String line;
                     while ((line = in.readLine()) != null) {
                         System.out.println(line);
+                        if (line.contains("ms/step")){
+                            continue;
+                        }
                         outputBuilder.append(line);
                     }
                 } catch (IOException e) {
