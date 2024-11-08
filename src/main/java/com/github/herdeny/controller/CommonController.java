@@ -15,10 +15,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Objects;
 
 /**
- * ClassName: CommonController
- * Description:
+ * 通用 模块
+ * 包含上传文件、读取文件等通用操作
  *
  * @Author Joel
  * @Create 2024/10/15 16:42
@@ -34,6 +35,12 @@ public class CommonController {
     private static final Logger logger = LoggerFactory.getLogger(CommonController.class);
 
 
+    /**
+     * 上传文件
+     * 上传文件都保存在 DATA_PATH 目录下
+     * @param file 用户上传文件
+     * @return 文件上传结果+路径
+     */
     @PostMapping("/upload")
     public Result<String> uploadFile(@RequestParam("file") MultipartFile file){
         //检查文件是否为空
@@ -41,13 +48,14 @@ public class CommonController {
             return Result.error("文件为空");
         }
         //检查目标文件夹是否存在，如果目标文件夹不存在，则创建
+        System.out.println(DATA_PATH);
         File directory = new File(DATA_PATH);
         if(!directory.exists()){
             directory.mkdirs();
         }
         //保存文件
         try {
-            File targetFile = new File(directory, file.getOriginalFilename());
+            File targetFile = new File(directory, Objects.requireNonNull(file.getOriginalFilename()));
             file.transferTo(targetFile);
             return Result.success("文件上传成功："+ targetFile.getAbsolutePath());
         }catch (Exception e){
@@ -58,6 +66,7 @@ public class CommonController {
 
     /**
      * 将指定文件的内容读取并写入到HTTP响应中
+     *
      * @param response
      * @param filePath
      */

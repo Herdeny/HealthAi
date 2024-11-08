@@ -9,7 +9,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 
-
+/**
+ * ROC 模块
+ * 用于 ROC 图的绘制
+ */
 @RestController
 @RequestMapping("/ROC")
 public class ROC_Controller extends CommonController {
@@ -20,17 +23,15 @@ public class ROC_Controller extends CommonController {
     @Value("${DATA_PATH}")
     private String DATA_PATH;
 
-    @Value("${MODEL_PATH}")
-    private String MODEL_PATH;
-
-    System.Logger logger = System.getLogger(PredictedLabelsController.class.getName());
-
-
-    //TODO 返回值
+    /**
+     * 测试绘图
+     * @param test_code 测试数据集编号，可选{1}
+     * @return test completed
+     */
     @PostMapping("/test")
-    public Result test(@RequestParam String test_code) {
+    public Result test(String test_code) {
         String result = rocService.test(test_code);
-        return Result.success("test completed" + result);
+        return Result.success("test completed");
     }
 
 
@@ -38,6 +39,7 @@ public class ROC_Controller extends CommonController {
      * 获取ROC图
      *
      * @param response
+     * @return Raw image/png
      */
     @GetMapping("/getROC")
     public void getROC(HttpServletResponse response) {
