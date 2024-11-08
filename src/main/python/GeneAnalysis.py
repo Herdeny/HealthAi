@@ -293,9 +293,9 @@ with tf.device("/cpu:0"):
 
 ##predicted_labels就是我们需要的预测结果，也就是前端需要输出的结果（这是一个数字，预测出来的就是病人的疾病阶段）
 
-print("Generating predicted labels...", flush=True)
+print("Generating predicted disease stages...", flush=True)
 predicted_labels = np.argmax(predictions, axis=1)
-print("Predicted labels:", predicted_labels, flush=True)
+print("Predicted disease stages:", predicted_labels, flush=True)
 ##当用户提供标签并且有多个样本的时候可以计算以下指标，主要用于评估模型的好坏，在这里自己可以进行判断，不需要放到前端
 # # 计算准确率
 # accuracy = accuracy_score(label, predicted_labels)
