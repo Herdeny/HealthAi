@@ -87,7 +87,7 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
                         }
                         String messageID = uid +"-" + UUID.randomUUID();
                         sseClient.sendMessage(uid,messageID,line);
-                        if (line.startsWith("Predicted labels:")) {
+                        if (line.startsWith("Predicted disease stages:")) {
                             result[0] = line.substring(line.lastIndexOf('[') + 1, line.lastIndexOf(']'));
                         }
                     }
