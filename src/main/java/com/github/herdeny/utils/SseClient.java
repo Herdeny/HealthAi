@@ -61,7 +61,7 @@ public class SseClient {
      */
     public boolean sendMessage(String uid, String messageId, String message) {
         if (StrUtil.isBlank(message)) {
-            log.info("参数异常，msg为null", uid);
+            log.info("消息推送失败uid:[{}],参数异常，msg为null", uid);
             return false;
         }
         SseEmitter sseEmitter = sseEmitterMap.get(uid);
