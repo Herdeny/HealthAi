@@ -21,4 +21,4 @@ if file_path.endswith('.csv'):
 row_attrs = {"Gene": np.array(x.var_names)}
 col_attrs = {"CellID": np.array(x.obs_names)}
 lp.create(file_path + ".loom", x.X.transpose(), row_attrs, col_attrs)
-print("loom文件绘图完成，已保存：" + file_path + ".loom")
+print("The loom file is saved：" + file_path + ".loom")
