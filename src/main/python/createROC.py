@@ -12,6 +12,7 @@ import pandas as pd
 
 # model_path = "../../../model"
 # data_path = "../../../data"
+print("Start load necessary info...", flush=True)
 model_path = sys.argv[1]
 data_path = sys.argv[2]
 test_code = sys.argv[3]
@@ -22,10 +23,10 @@ mapping_filtered = mapping[~mapping['Gene_name'].isin(['1-Sep', '10-Sep', '11-Se
 '8-Sep', '9-Sep', 'NRD1', 'SRPR'])]
 
 
-df = pd.read_csv(data_path + "GSM4432654_EC10.csv",header = 0,index_col=0) ##用户输入数据
+df_Braak = pd.read_csv(data_path + "GSM4432654_EC10.csv", header = 0, index_col=0) ##用户输入数据
 # 行列转置
-df=df.T
-df = df.loc[mapping_filtered["Gene_name"].tolist()]
+df_Braak=df_Braak.T
+df_Braak = df_Braak.loc[mapping_filtered["Gene_name"].tolist()]
 
 # 时空融合
 sp = pd.read_csv(model_path + "final_spatial_fusion.csv", index_col=None, header=0)  ##这是ROSMAP数据空间融合后的结果
@@ -34,7 +35,7 @@ sp_filtered = sp[~sp.index.isin(['1-Sep', '10-Sep', '11-Sep', '14-Sep', '15-Sep'
                                  '2-Mar', '2-Sep', '3-Sep', '4-Sep', '5-Sep', '6-Sep', '7-Sep', '8-Sep', '9-Sep',
                                  'NRD1', 'SRPR'])]
 graph_embedding = sp_filtered.values
-patient_matrix = df.values
+patient_matrix = df_Braak.values
 import scipy as sp
 from functools import reduce
 import scipy.spatial.distance as sd
@@ -241,8 +242,8 @@ for filename in os.listdir(directory):
     # 确保只处理文件（可选）
     if os.path.isfile(os.path.join(directory, filename)):
         ##如果有多个矩阵，这一块代码（到patient_matrix2.append为止）需要进行for循环读取数据，每一个样本都需要进行融合
-        df = pd.read_csv(directory + filename, header=0, index_col=0)
-        a = pca.fit_transform(df.values.T)
+        df_Braak = pd.read_csv(directory + filename, header=0, index_col=0)
+        a = pca.fit_transform(df_Braak.values.T)
         Wy = neighbor_graph(a, k=5)
         pX, pY = ManifoldLinear(graph_embedding, a, corr, 100, Wx,
                                 Wy).project(graph_embedding, a)
@@ -256,15 +257,21 @@ X = patient_matrix2.reshape((patient_matrix2.shape[0], patient_matrix2.shape[1],
 patient_matrix2.shape[2], 1))
 import tensorflow as tf
 ##读入三个文件中的一个，想要预测CERAD就读入CERAD模型，想要预测Braak就读入Braak模型，想要预测Cogdx就读入Cogdx模型
-best_model = tf.keras.models.load_model(model_path + 'best_model_tempro-spatialfusion_Cogdx.h5')
+best_model_Braak = tf.keras.models.load_model(model_path + 'best_model_tempro-spatialfusion_Braak.h5')
+best_model_CERAD = tf.keras.models.load_model(model_path + 'best_model_tempro-spatialfusion_CERAD.h5')
+best_model_Cogdx = tf.keras.models.load_model(model_path + 'best_model_tempro-spatialfusion_Cogdx.h5')
 with tf.device("/cpu:0"):
-    predictions = best_model.predict(X)
+    predictions_Braak = best_model_Braak.predict(X)
+    predictions_CERAD = best_model_CERAD.predict(X)
+    predictions_Cogdx = best_model_Cogdx.predict(X)
 
 ##predicted_labels就是我们需要的预测结果，也就是前端需要输出的结果（这是一个数字，预测出来的就是病人的疾病阶段）
-predicted_labels = np.argmax(predictions, axis=1)
+predicted_labels_Braak = np.argmax(predictions_Braak, axis=1)
+predicted_labels_CERAD = np.argmax(predictions_CERAD, axis=1)
+predicted_labels_Cogdx = np.argmax(predictions_Cogdx, axis=1)
 
 
-print(predicted_labels)
+print(f"Braak predicted results:{predicted_labels_Braak},CERAD predicted results:{predicted_labels_CERAD},Cogdx predicted results:{predicted_labels_Cogdx}",flush=True)
 
 ##当用户提供标签并且有多个样本的时候可以计算以下指标，主要用于评估模型的好坏，在这里自己可以进行判断，不需要放到前端
 # # 计算准确率
@@ -286,51 +293,64 @@ print(predicted_labels)
 # df = pd.DataFrame({'pred': predicted_labels})
 # df.to_csv('./Braak.csv',index=None,columns=None)
 
-df = pd.DataFrame(predictions)
-df.to_csv(data_path + "Braak.csv", index=None, columns=None)
+df_Braak_1 = pd.DataFrame(predictions_Braak)
+df_Braak_1.to_csv(data_path + "Braak.csv", index=None, columns=None)
+df_CERAD = pd.DataFrame(predictions_CERAD)
+df_CERAD.to_csv(data_path + "CERAD.csv", index=None, columns=None)
+df_CogDx = pd.DataFrame(predictions_Cogdx)
+df_CogDx.to_csv(data_path + "CogDx.csv", index=None, columns=None)
+print("Predicted results saved.", flush=True)
+
 
 from sklearn.preprocessing import label_binarize
 from sklearn.metrics import roc_curve
 import matplotlib.pyplot as plt
 from sklearn.metrics import auc
 
-# methods = ["Braak","CERAD","CogDx"]
-methods = ["Braak"]
+methods = ["Braak","CERAD","CogDx"]
+# methods = ["Braak"]
 colors = ["#CBE99A","#FDB96A","#87CFA4"]
 plt.figure(figsize=(20, 20))
 plt.rc('font', size=20)
  ## Braak、CERAD、CogDx三个变量分别读取预测的三个指标的predictions数据
 Braak = pd.read_csv(data_path + "Braak.csv")
-# CERAD = pd.read_csv("./CERAD.csv")
-# CogDx = pd.read_csv("./CogDx.csv")
+CERAD = pd.read_csv(data_path + "CERAD.csv")
+CogDx = pd.read_csv(data_path + "CogDx.csv")
+
  ## 读取真实标签
 true = pd.read_csv(model_path + "label"+ test_code +".csv",header = 0,index_col=None)
 
 true_label1 = list(map(int,true["Braak"].tolist()))
-# true_label2 = list(map(int,true["CERAD"].tolist()))
-# true_label3 = list(map(int,true["CogDx"].tolist()))
+true_label2 = list(map(int,true["CERAD"].tolist()))
+true_label3 = list(map(int,true["Cogdx"].tolist()))
 method1_labels = Braak.values[:,:]
-# method2_labels = CERAD.values[:,:-1]
-# method3_labels = CogDx.values[:,:-1]
+method2_labels = CERAD.values[:,:]
+method3_labels = CogDx.values[:,:]
 true_labels_bin1 = label_binarize(true["Braak"].tolist(), classes = [0,1,2,3,4,5,6])
-# true_labels_bin2 = label_binarize(true["CERAD"].tolist(),classes=
-# [0]+list(np.unique(true_label2)))
-# true_labels_bin3 = label_binarize(true["Cogimport matplotlib.pyplot as pltDx"].tolist(), classes=
-# [0]+list(np.unique(true_label3)))
-# methods_labels = [method1_labels, method2_labels, method3_labels]
+true_labels_bin2 = label_binarize(true["CERAD"].tolist(),classes=
+[0]+list(np.unique(true_label2)))
+true_labels_bin3 = label_binarize(true["Cogdx"].tolist(), classes=
+[0]+list(np.unique(true_label3)))
+methods_labels = [method1_labels, method2_labels, method3_labels]
 
-# true_labels = [true_labels_bin1, true_labels_bin2, true_labels_bin3]
+true_labels = [true_labels_bin1, true_labels_bin2, true_labels_bin3]
+for i, (true_label, method_label) in enumerate(zip(true_labels, methods_labels)):
+    print(f"true_labels[{i}].shape: {true_label.shape}")
+    print(f"methods_labels[{i}].shape: {method_label.shape}")
+    print(f"true_labels[{i}]: {true_label}")
+    print(f"methods_labels[{i}]: {method_label}")
 
-# for j, method_label in enumerate(methods_labels):
-#     fpr1, tpr1, _ = roc_curve(true_labels[j].ravel(), method_label.ravel())
-#     roc_auc = auc(fpr1, tpr1)
-#     plt.plot(fpr1, tpr1, label='%s (AUC = %0.2f)' % (methods[j], roc_auc), lw=2,color=colors[j])
-print(true_labels_bin1)
-print(method1_labels)
-fpr1, tpr1, _ = roc_curve(true_labels_bin1.ravel(), method1_labels.ravel())
-roc_auc = auc(fpr1, tpr1)
-plt.plot(fpr1, tpr1, label='%s (AUC = %0.2f)' % (methods[0], roc_auc), lw=2, color=colors[0])
 
+for j, method_label in enumerate(methods_labels):
+    fpr1, tpr1, _ = roc_curve(true_labels[j].ravel(), method_label.ravel())
+    roc_auc = auc(fpr1, tpr1)
+    plt.plot(fpr1, tpr1, label='%s (AUC = %0.2f)' % (methods[j], roc_auc), lw=2,color=colors[j])
+# print(true_labels_bin1)
+# print(method1_labels)
+# fpr1, tpr1, _ = roc_curve(true_labels_bin1.ravel(), method1_labels.ravel())
+# roc_auc = auc(fpr1, tpr1)
+# plt.plot(fpr1, tpr1, label='%s (AUC = %0.2f)' % (methods[0], roc_auc), lw=2, color=colors[0])
+#
 plt.plot([0, 1], [0, 1], color='gray', lw=2, linestyle='--')
 plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.05])
@@ -339,5 +359,4 @@ plt.ylabel('True Positive Rate')
 plt.legend(loc="lower right")
 plt.tight_layout()
 plt.savefig(data_path + 'ROC.png',dpi=750,bbox_inches='tight')
-plt.show()
 
