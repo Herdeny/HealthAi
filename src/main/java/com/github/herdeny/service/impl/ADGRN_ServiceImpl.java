@@ -2,7 +2,6 @@ package com.github.herdeny.service.impl;
 
 import com.github.herdeny.service.ADGRN_Service;
 import com.github.herdeny.utils.SseClient;
-import com.github.herdeny.utils.JsonTools;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -113,7 +112,7 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
             String line;
             while ((line = reader.readLine()) != null) {
                 System.out.println(line);
-                if (line.contains("INFO")) {
+                if (!line.toLowerCase().contains("warn") && !line.toLowerCase().contains("error")) {
                     String messageID = uid + "-" + UUID.randomUUID();
                     sseClient.sendMessage(uid, messageID, line);
                 }
@@ -154,13 +153,13 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
             String actionStr;
             while ((actionStr = in.readLine()) != null) {
                 System.out.println(actionStr);
-                if (actionStr.startsWith("网络图节点数量:")){
+                if (actionStr.startsWith("Number of nodes in the network graph:")){
                     result.put("网络图节点数量", actionStr.split(":")[1].trim());
                 }
-                if (actionStr.startsWith("网络图边数量:")){
+                if (actionStr.startsWith("Number of edges in the network graph:")){
                     result.put("网络图边数量", actionStr.split(":")[1].trim());
                 }
-                if (actionStr.startsWith("模块数量:")){
+                if (actionStr.startsWith("Number of modules:")){
                     result.put("模块数量", actionStr.split(":")[1].trim());
                 }
                 String messageId = uid + "-" + UUID.randomUUID();
