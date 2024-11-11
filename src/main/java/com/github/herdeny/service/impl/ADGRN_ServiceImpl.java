@@ -35,9 +35,6 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
     @Value("${CREATE_LOOM_PATH}")
     String CREATE_LOOM_PATH;
 
-    @Value("${CREATE_TSV_PATH}")
-    String CREATE_TSV_PATH;
-
     @Value("${CREATE_ADGRN_COMPLEX_PATH}")
     String CREATE_ADGRN_COMPLEX_PATH;
 
