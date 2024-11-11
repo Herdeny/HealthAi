@@ -7,5 +7,5 @@ public interface ADGRN_Service {
 
     JSONObject adgrn_createImg(String filePath, String uid);
 
-    int adgrn_createTSV(String filePath, String uid);
+    JSONObject adgrn_createTSV(String filePath, String uid);
 }

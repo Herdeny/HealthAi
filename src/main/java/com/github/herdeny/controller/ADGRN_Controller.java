@@ -65,23 +65,25 @@ public class ADGRN_Controller extends CommonController {
     @PostMapping("/run")
     public Result<Map<String, Object>> run(@RequestParam String fileName, String uid) {
         String filePath = DATA_PATH + fileName;
+        JSONObject result;
         if (!adgrnService.adgrn_createLoom(filePath, uid)) {
             return Result.error(500, "loom文件生成失败");
         }
         String loom_filePath = filePath.substring(0, filePath.lastIndexOf(".")) + ".loom";
-        if (adgrnService.adgrn_createTSV(loom_filePath, uid) != 0) {
-            return Result.error(500, "TSV生成失败");
+        result = adgrnService.adgrn_createTSV(loom_filePath, uid);
+        if (!result.getBoolean("success")) {
+            return Result.error(result.getInt("code"), "TSV文件生成失败", result.toMap());
         }
-        JSONObject result_json = adgrnService.adgrn_createImg("adj.tsv", uid);
-        if (result_json.isEmpty()) {
+        result = adgrnService.adgrn_createImg("adj.tsv", uid);
+        if (result.isEmpty()) {
             return Result.error(500, "绘图数据为空");
         }
-        System.out.println("返回绘图数据文件：" + result_json);
+        System.out.println("返回绘图数据文件：" + result);
         JsonTools jsonTools = new JsonTools();
-        jsonTools.saveJsonToFile(result_json, DATA_PATH + "result.json");
-        System.out.println("result.json saved");
+        jsonTools.saveJsonToFile(result, DATA_PATH + "AD-GRN result.json");
+        System.out.println("AD-GRN result.json saved");
         // 将 JSONObject 转换为 Map
-        Map<String, Object> map = result_json.toMap();
+        Map<String, Object> map = result.toMap();
         return Result.success(map);
     }
 
@@ -118,12 +120,12 @@ public class ADGRN_Controller extends CommonController {
      * }
      */
     @PostMapping("/tsv")
-    public Result<Integer> tsv(@RequestParam String filePath, String uid) {
-        int returnCode = adgrnService.adgrn_createTSV(filePath, uid);
-        if (returnCode != 0) {
-            return Result.error(returnCode, "TSV生成失败");
+    public Result<Map<String,Object>> tsv(@RequestParam String filePath, String uid) {
+        JSONObject result = adgrnService.adgrn_createTSV(filePath, uid);
+        if (!result.getBoolean("success")) {
+            return Result.error(result.getInt("Error code"), "TSV文件生成失败", result.toMap());
         }
-        return Result.success(returnCode);
+        return Result.success(result.toMap());
     }
 
     /**
@@ -158,7 +160,7 @@ public class ADGRN_Controller extends CommonController {
     /**
      * 获取GRN图
      *
-     * @param response
+     * @param response HttpServletResponse
      * @return Raw image/png
      */
     @GetMapping("/getGRN")
