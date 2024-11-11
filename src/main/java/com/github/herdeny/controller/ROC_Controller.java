@@ -29,7 +29,7 @@ public class ROC_Controller extends CommonController {
      * @return test completed
      */
     @PostMapping("/test")
-    public Result test(String test_code) {
+    public Result test(@RequestParam String test_code) {
         String result = rocService.test(test_code);
         return Result.success("test completed");
     }
