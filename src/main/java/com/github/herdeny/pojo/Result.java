@@ -31,4 +31,8 @@ public class Result<T> {
     public static <E> Result<E> error(int code) {
         return new Result<>(code, null, null);
     }
+
+    public static <E> Result<E> error(int code, String msg, E data) {
+        return new Result<>(code, msg, data);
+    }
 }
