@@ -1,7 +1,9 @@
 package com.github.herdeny.service.impl;
 
 import com.github.herdeny.service.PredictedLabelsService;
+import com.github.herdeny.utils.JsonTools;
 import com.github.herdeny.utils.SseClient;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -51,6 +53,8 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
 
     @Autowired
     private SseClient sseClient;
+
+    static final String[] description = {"", "", "", "", "", ""};
 
     /**
      * 疾病阶段预测
@@ -117,6 +121,12 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
             errorThread.join();
 
             if (exitCode == 0) {
+                JSONObject result_json = new JSONObject();
+                result_json.put("疾病阶段", result[0]);
+                result_json.put("描述", description[result[0].charAt(0) - '0']);
+                JsonTools jsonTools = new JsonTools();
+                jsonTools.saveJsonToFile(result_json, dataPath + "Prediction result.json");
+                System.out.println("Prediction result.json saved");
                 return result[0];
             } else {
                 System.err.println("Process exited with code: " + exitCode);
