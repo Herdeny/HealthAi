@@ -16,27 +16,49 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 from reportlab.pdfgen import canvas as Canvas
 from reportlab.platypus import Image, SimpleDocTemplate, Spacer, Paragraph, Table, TableStyle
+import json
 
+
+print("Loading necessary data...", flush=True)
+# model_path = "../../../model/"
+# data_path = "../../../data/"
+model_path = sys.argv[1]
+data_path = sys.argv[2]
+xioahui_path = model_path + "xiaohui.jpg"
+yuanhui_path = model_path + "yuanhui.png"
+prediction_json_path = data_path + "Prediction result.json"
+adgrn_json_path = data_path + "AD-GRN result.json"
+with open(adgrn_json_path, 'r', encoding='utf-8') as adgrn_json_file:
+    adgrn_json = json.load(adgrn_json_file)
+print(f"AD-GRN data loaded.", flush=True)
+with open(prediction_json_path, 'r', encoding='utf-8') as prediction_data_file:
+    prediction_json = json.load(prediction_data_file)
+print(f"Prediction data loaded.", flush=True)
+print("All data has been loaded.", flush=True)
+print("Loading Fonts...", flush=True)
 # 设置字体
 pdfmetrics.registerFont(UnicodeCIDFont('STSong-Light'))
 song = 'STSong-Light'
+print("Fonts loaded.", flush=True)
 
+#设置页面模板
+print("Setting up the page template...", flush=True)
 # 增加图像像素限制
 PILImage.MAX_IMAGE_PIXELS = None
+
 
 # 报告尺寸限制
 PAGE_HEIGHT = A4[1]
 PAGE_WIDTH = A4[0]
+print("Page template set.", flush=True)
 
-# 加载图像
-img = PILImage.open("aliyun.png")
-img = img.convert("RGBA")
+print("Creating the report...", flush=True)
 
 # 日期
 report_date = datetime.date.today()
 
 # 创建文档
-doc = SimpleDocTemplate("pathology_report.pdf", pagesize=A4)
+doc = SimpleDocTemplate(data_path + "pathology_report.pdf", pagesize=A4)
 
 # 样式表
 styles = getSampleStyleSheet()
@@ -46,7 +68,7 @@ styleSubH = ParagraphStyle(name="SimSubSunHeading", fontName=song, fontSize=16, 
 styleCenter = ParagraphStyle(name="Center", fontName=song, fontSize=12, leading=14, alignment=TA_CENTER)
 
 # 图片和描述
-images = ['GRN.png','1.png', '2.png', '3.png']  # 图片路径
+images = [data_path + 'GRN.png',data_path + 'ROC.png', data_path + '2.png', data_path + '3.png']  # 图片路径
 descriptions = ['AD-GRN地形图','ROC曲线', 'PR曲线', '小提琴图']  # 对应的图片描述
 
 
@@ -96,10 +118,10 @@ def DrawPageHead(c: Canvas):
 
 
 def DrawLogo(c: Canvas):
-    c.drawImage("xiaohui.jpg", 30, PAGE_HEIGHT - 46.5, width=25, height=25, mask='auto')
+    c.drawImage(xioahui_path, 30, PAGE_HEIGHT - 46.5, width=25, height=25, mask='auto')
     yuanhui_width = 120
     yuanhui_height = yuanhui_width * 0.25136
-    c.drawImage("yuanhui.png", 58, PAGE_HEIGHT - 50, width=yuanhui_width, height=yuanhui_height,
+    c.drawImage(yuanhui_path, 58, PAGE_HEIGHT - 50, width=yuanhui_width, height=yuanhui_height,
                 mask='auto')
 
 
@@ -126,8 +148,8 @@ Story = [Spacer(1, inch), Paragraph("诊断结果", ParagraphStyle(
 # 添加表格示例（病理学数据）
 data = [
     ['诊断项', '值', '说明'],
-    ['预测疾病阶段', '3', '预测为疾病的第3阶段'],
-    ['准确率', '85%', '预测的整体准确率'],
+    ['预测疾病阶段', prediction_json['疾病阶段'], prediction_json['描述']],
+    # ['准确率', '85%', '预测的整体准确率'],
     # ['精确度', '88%', '实际为正的比例'],
     # ['召回率', '80%', '被正确预测为正的比例'],
     # ['F1分数', '84%', '模型的综合表现']
@@ -180,7 +202,7 @@ for index, (img_path, desc) in enumerate(zip(images, descriptions)):
         # 定义表格数据
         additional_table_data = [
             ['网络图节点数量', '网络图边数量', '模块数量'],
-            ['38469', '78564', '60']
+            [adgrn_json['网络图节点数量'], adgrn_json['网络图边数量'], adgrn_json['模块数量']]
         ]
 
         # 创建表格
@@ -214,6 +236,8 @@ image_table.setStyle(TableStyle([
 
 # 将表格添加到报告中
 Story.append(image_table)
+print("Report created.", flush=True)
 
 # 保存文档
 doc.build(Story, onFirstPage=report_page, onLaterPages=myLaterPages)
+print("Report saved.", flush=True)

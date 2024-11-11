@@ -1,5 +1,7 @@
 package com.github.herdeny.service;
 
-//TODO 报告生成
+import org.json.JSONObject;
+
 public interface Report_Service {
+    JSONObject createReport(String uid);
 }
