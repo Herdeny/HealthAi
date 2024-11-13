@@ -23,18 +23,18 @@ public class SseClient {
         SseEmitter sseEmitter = new SseEmitter(0l);
         //完成后回调
         sseEmitter.onCompletion(() -> {
-            log.info("[{}]结束连接...................", uid);
+            log.info("User [{}] Disconnected", uid);
             sseEmitterMap.remove(uid);
         });
         //超时回调
         sseEmitter.onTimeout(() -> {
-            log.info("[{}]连接超时...................", uid);
+            log.info("User [{}] Time Out", uid);
         });
         //异常回调
         sseEmitter.onError(
                 throwable -> {
                     try {
-                        log.info("[{}]连接异常,{}", uid, throwable.toString());
+                        log.info("Error in Connect:{UID:[{}]:Info:[{}]}", uid, throwable.toString());
                         sseEmitter.send(SseEmitter.event()
                                 .id(uid)
                                 .name("发生异常！")
@@ -52,7 +52,7 @@ public class SseClient {
             e.printStackTrace();
         }
         sseEmitterMap.put(uid, sseEmitter);
-        log.info("[{}]创建sse连接成功！", uid);
+        log.info("User [{}] Connected", uid);
         return sseEmitter;
     }
 
@@ -61,21 +61,21 @@ public class SseClient {
      */
     public boolean sendMessage(String uid, String messageId, String message) {
         if (StrUtil.isBlank(message)) {
-            log.info("消息推送失败uid:[{}],参数异常，msg为null", uid);
+            log.info("Message Not Send:{Uid:[{}], Reason:[Message is null]}", uid);
             return false;
         }
         SseEmitter sseEmitter = sseEmitterMap.get(uid);
         if (sseEmitter == null) {
-            log.info("消息推送失败uid:[{}],没有创建连接，请重试。", uid);
+            log.info("Message Not Send:{UID:[{}],Reason:[Connect is not exist]}", uid);
             return false;
         }
         try {
             sseEmitter.send(SseEmitter.event().id(messageId).reconnectTime(1 * 60 * 1000L).data(message));
-            log.info("用户{},消息id:{},推送成功:{}", uid, messageId, message);
+            log.info("Send: {UID:[{}],MessageID:[{}],Content:[{}]}", uid, messageId, message);
             return true;
         } catch (Exception e) {
             sseEmitterMap.remove(uid);
-            log.info("用户{},消息id:{},推送异常:{}", uid, messageId, e.getMessage());
+            log.info("SSE Error:{UID:[{}],MessageID:[{}],Error:[{}]}", uid, messageId, e.getMessage());
             sseEmitter.complete();
             return false;
         }
@@ -92,7 +92,7 @@ public class SseClient {
             sseEmitter.complete();
             sseEmitterMap.remove(uid);
         } else {
-            log.info("用户{} 连接已关闭", uid);
+            log.info("User [{}] Disconnected", uid);
         }
 
     }
