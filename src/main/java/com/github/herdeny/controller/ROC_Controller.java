@@ -3,11 +3,13 @@ package com.github.herdeny.controller;
 import com.github.herdeny.pojo.Result;
 import com.github.herdeny.service.ROC_Service;
 import jakarta.servlet.http.HttpServletResponse;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  * ROC 模块
@@ -25,13 +27,17 @@ public class ROC_Controller extends CommonController {
 
     /**
      * 测试绘图
+     *
      * @param test_code 测试数据集编号，可选{1}
-     * @return test completed
+     * @param uid       用于指定SSE发送端口
      */
     @PostMapping("/test")
-    public Result test(@RequestParam String test_code) {
-        String result = rocService.test(test_code);
-        return Result.success("test completed");
+    public Result<Map<String, Object>> test(@RequestParam String test_code, String uid) {
+        JSONObject result = rocService.test(test_code, uid);
+        if (!result.getBoolean("success")) {
+            return Result.error(result.getInt("code"), "ROC绘制失败", result.toMap());
+        }
+        return Result.success(result.toMap());
     }
 
 

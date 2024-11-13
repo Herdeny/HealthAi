@@ -18,7 +18,11 @@ x = sc.read_csv(file_path)
 if file_path.endswith('.csv'):
     file_path = file_path[:-4]
 
+# 开始提取数据
+print("Start extracting data from " + file_path + ".csv", flush=True)
 row_attrs = {"Gene": np.array(x.var_names)}
 col_attrs = {"CellID": np.array(x.obs_names)}
+print("Data extraction completed", flush=True)
+print("Start generating the loom file", flush=True)
 lp.create(file_path + ".loom", x.X.transpose(), row_attrs, col_attrs)
-print("The loom file is saved：" + file_path + ".loom")
+print("The loom file is generated.", flush=True)

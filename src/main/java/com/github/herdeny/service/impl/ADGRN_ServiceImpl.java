@@ -45,7 +45,8 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
     private SseClient sseClient;
 
     @Override
-    public boolean adgrn_createLoom(String filePath, String uid) {
+    public JSONObject adgrn_createLoom(String filePath, String uid) {
+        JSONObject result = new JSONObject();
         boolean flag = true;
         System.out.println("Start Generate Loom...");
         sseClient.sendMessage(uid, uid + "-start-create-loom", "Start Generate Loom...");
@@ -68,7 +69,17 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
 
             String errorStr;
             while ((errorStr = err.readLine()) != null) {
-                if (flag) flag = false;
+                if (errorStr.contains("Error")) {
+                    if (flag) flag = false;
+                    String regex = "\\[(Errno|WinError)\\s+(\\d+)]";
+                    Pattern pattern = Pattern.compile(regex);
+                    Matcher matcher = pattern.matcher(errorStr);
+                    if (matcher.find()) {
+                        result.put("code", matcher.group(2));
+                    }
+                    result.put("data", errorStr);
+                    sseClient.sendMessage(uid, uid + "-error-create-loom", "create loom error");
+                }
                 System.err.println(errorStr);
             }
 
@@ -78,12 +89,17 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
-        return flag;
+        result.put("success", flag);
+        if (flag) {
+            sseClient.sendMessage(uid, uid + "-end-create-loom", "Complete Generate Loom");
+            result.put("code", 0);
+        }
+        return result;
     }
 
     public JSONObject adgrn_createTSV(String filePath, String uid) {
-        boolean flag = true;
         JSONObject result = new JSONObject();
+        boolean flag = true;
         System.out.println("Start Generate TSV...");
         sseClient.sendMessage(uid, uid + "-start-create-tsv", "Start Generate TSV...");
 
@@ -114,13 +130,14 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
             while ((errorStr = err.readLine()) != null) {
                 if (errorStr.contains("error:")) {
                     if (flag) flag = false;
-                    String regex = "\\[Errno (\\d+)]";
+                    String regex = "\\[(Errno|WinError)\\s+(\\d+)]";
                     Pattern pattern = Pattern.compile(regex);
                     Matcher matcher = pattern.matcher(errorStr);
                     if (matcher.find()) {
-                        result.put("Error code", matcher.group(1));
+                        result.put("code", matcher.group(2));
                     }
-                    result.put("Error Message", errorStr.substring(errorStr.indexOf("error:") + 7));
+                    result.put("data", errorStr.substring(errorStr.indexOf("error:") + 7));
+                    sseClient.sendMessage(uid, uid + "-error-create-tsv", "create tsv error");
                 }
                 System.err.println(errorStr);
             }
@@ -144,6 +161,7 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
     @Override
     public JSONObject adgrn_createImg(String filePath, String uid) {
         JSONObject result = new JSONObject();
+        boolean flag = true;
 
         System.out.println("Start Generate Image...");
         sseClient.sendMessage(uid, uid + "-start-adgrn", "Start Generate Image...");
@@ -157,23 +175,36 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
             BufferedReader err = new BufferedReader(new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8));
 
             String actionStr;
+            Map<String,String> resultMap = new HashMap<>();
             while ((actionStr = in.readLine()) != null) {
                 System.out.println(actionStr);
                 if (actionStr.startsWith("Number of nodes in the network graph:")) {
-                    result.put("网络图节点数量", actionStr.split(":")[1].trim());
+                    resultMap.put("网络图节点数量", actionStr.split(":")[1].trim());
                 }
                 if (actionStr.startsWith("Number of edges in the network graph:")) {
-                    result.put("网络图边数量", actionStr.split(":")[1].trim());
+                    resultMap.put("网络图边数量", actionStr.split(":")[1].trim());
                 }
                 if (actionStr.startsWith("Number of modules:")) {
-                    result.put("模块数量", actionStr.split(":")[1].trim());
+                    resultMap.put("模块数量", actionStr.split(":")[1].trim());
                 }
+                result.put("data", resultMap);
                 String messageId = uid + "-" + UUID.randomUUID();
                 sseClient.sendMessage(uid, messageId, actionStr);
             }
 
             String errorStr;
             while ((errorStr = err.readLine()) != null) {
+                if (errorStr.contains("Error")) {
+                    if (flag) flag = false;
+                    String regex = "\\[(Errno|WinError)\\s+(\\d+)]";
+                    Pattern pattern = Pattern.compile(regex);
+                    Matcher matcher = pattern.matcher(errorStr);
+                    if (matcher.find()) {
+                        result.put("code", matcher.group(2));
+                    }
+                    result.put("data", errorStr);
+                    sseClient.sendMessage(uid, uid + "-error-adgrn", "create image error");
+                }
                 System.err.println(errorStr);
             }
             in.close();
@@ -182,8 +213,12 @@ public class ADGRN_ServiceImpl implements ADGRN_Service {
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
-        System.out.println("Complete Generate Image");
-        sseClient.sendMessage(uid, uid + "-end-create-image", "Complete Generate Image");
+        result.put("success", flag);
+        if (flag) {
+            System.out.println("Complete Generate Image");
+            sseClient.sendMessage(uid, uid + "-end-create-image", "Complete Generate Image");
+            result.put("code", 0);
+        }
         return result;
     }
 }

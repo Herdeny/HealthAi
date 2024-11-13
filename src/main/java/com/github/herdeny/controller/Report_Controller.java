@@ -42,7 +42,7 @@ public class Report_Controller extends CommonController {
         if (result.getBoolean("success")) {
             return Result.success(result.toMap());
         }
-        return Result.error(result.getInt("Error code"), "报告生成失败", result.toMap());
+        return Result.error(result.getInt("code"), "报告生成失败", result.toMap());
     }
 
 

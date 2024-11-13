@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -54,7 +56,7 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
     @Autowired
     private SseClient sseClient;
 
-    static final String[] description = {"", "", "", "", "", ""};
+    static final String[] description = {"NO DEMENTIA SEEN", "SUBJECTIVE MEMORY LOSS, AGE RELATED FORGETFULNESS", "MILD COGNITIVE IMPAIRMENT", "MODERATELY SEVERE COGNITIVE DECLINE, MODERATE DEMENTIA", "SEVERE COGNITIVE DECLINE, MODERATELY SEVERE DEMENTIA", "VERY SEVERE COGNITIVE DECLINE, SEVERE DEMENTIA"};
 
     /**
      * 疾病阶段预测
@@ -62,7 +64,10 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
      * @param filePath 用户传入的csv文件路径
      */
     @Override
-    public String predict(String filePath, String uid) {
+    public JSONObject predict(String filePath, String uid) {
+        JSONObject[] result = new JSONObject[1];
+        result[0] = new JSONObject();
+        boolean[] flag = {true};
         System.out.println("Start Predicting pathological stages...");
         sseClient.sendMessage(uid, uid + "-start-predict", "Start Predicting pathological stages...");
 
@@ -75,7 +80,6 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
         };
 
         Process process = null;
-        String[] result = new String[1];
         try {
             process = Runtime.getRuntime().exec(args1);
 
@@ -86,13 +90,13 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
                     String line;
                     while ((line = in.readLine()) != null) {
                         System.out.println(line);
-                        if (line.contains("ms/step")){
+                        if (line.contains("s/step")) {
                             continue;
                         }
-                        String messageID = uid +"-" + UUID.randomUUID();
-                        sseClient.sendMessage(uid,messageID,line);
+                        String messageID = uid + "-" + UUID.randomUUID();
+                        sseClient.sendMessage(uid, messageID, line);
                         if (line.startsWith("Predicted disease stages:")) {
-                            result[0] = line.substring(line.lastIndexOf('[') + 1, line.lastIndexOf(']'));
+                            result[0].put("data", line.substring(line.lastIndexOf('[') + 1, line.lastIndexOf(']')));
                         }
                     }
                 } catch (IOException e) {
@@ -105,6 +109,17 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
                 try (BufferedReader err = new BufferedReader(new InputStreamReader(finalProcess1.getErrorStream(), StandardCharsets.UTF_8))) {
                     String errorStr;
                     while ((errorStr = err.readLine()) != null) {
+                        if (errorStr.contains("Error") && !errorStr.startsWith("WARNING")) {
+                            if (flag[0]) flag[0] = false;
+                            String regex = "\\[(Errno|WinError)\\s+(\\d+)]";
+                            Pattern pattern = Pattern.compile(regex);
+                            Matcher matcher = pattern.matcher(errorStr);
+                            if (matcher.find()) {
+                                result[0].put("code", matcher.group(2));
+                            }
+                            result[0].put("data", errorStr);
+                            sseClient.sendMessage(uid, uid + "-error-predict", "Failed Predicting pathological stages...");
+                        }
                         System.err.println(errorStr);
                     }
                 } catch (IOException e) {
@@ -120,20 +135,19 @@ public class PredictedLabelsServiceImpl implements PredictedLabelsService {
             outputThread.join();
             errorThread.join();
 
+            result[0].put("success", flag[0]);
             if (exitCode == 0) {
                 JSONObject result_json = new JSONObject();
-                result_json.put("疾病阶段", result[0]);
-                result_json.put("描述", description[result[0].charAt(0) - '0']);
+                result_json.put("疾病阶段", result[0].getInt("data") + 1);
+                result_json.put("描述", description[result[0].getString("data").charAt(0) - '0']);
                 JsonTools jsonTools = new JsonTools();
                 jsonTools.saveJsonToFile(result_json, dataPath + "Prediction result.json");
                 System.out.println("Prediction result.json saved");
-                return result[0];
             } else {
                 System.err.println("Process exited with code: " + exitCode);
                 // 可以根据需要返回不同的结果或抛出异常
-                return null;
             }
-
+            return result[0];
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("Error during prediction: " + e.getMessage(), e);
         } finally {

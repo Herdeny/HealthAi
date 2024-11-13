@@ -10,8 +10,9 @@ import os
 import numpy as np
 import pandas as pd
 
-# model_path = "../../../model"
-# data_path = "../../../data"
+# model_path = "../../../model/"
+# data_path = "../../../data/"
+# test_code = "1"
 print("Start load necessary info...", flush=True)
 model_path = sys.argv[1]
 data_path = sys.argv[2]
@@ -235,6 +236,8 @@ pca = PCA(n_components=100)
 patient_matrix1 = []
 patient_matrix2 = []
 
+# 读取测试数据
+print("Loading test data...", flush=True)
 directory = data_path + "test_data" + test_code +"/"
 
 # 遍历目录下的文件
@@ -249,10 +252,13 @@ for filename in os.listdir(directory):
                                 Wy).project(graph_embedding, a)
         patient_matrix1.append(scaler.fit_transform(pX))
         patient_matrix2.append(scaler.fit_transform(pY))
+#生成矩阵
+print("Generating matrices...", flush=True)
 patient_matrix1 = np.array(patient_matrix1)
 patient_matrix2 = np.array(patient_matrix2)
 
 # 预测结果，将时空融合中的patient_matrix2作为输入，进行预测。
+print("Predicting results...", flush=True)
 X = patient_matrix2.reshape((patient_matrix2.shape[0], patient_matrix2.shape[1],
 patient_matrix2.shape[2], 1))
 import tensorflow as tf
@@ -271,10 +277,10 @@ predicted_labels_CERAD = np.argmax(predictions_CERAD, axis=1)
 predicted_labels_Cogdx = np.argmax(predictions_Cogdx, axis=1)
 
 
-print(f"Braak predicted results:{predicted_labels_Braak},CERAD predicted results:{predicted_labels_CERAD},Cogdx predicted results:{predicted_labels_Cogdx}",flush=True)
+# print(f"Braak predicted results:{predicted_labels_Braak},CERAD predicted results:{predicted_labels_CERAD},Cogdx predicted results:{predicted_labels_Cogdx}",flush=True)
 
-##当用户提供标签并且有多个样本的时候可以计算以下指标，主要用于评估模型的好坏，在这里自己可以进行判断，不需要放到前端
-# # 计算准确率
+#当用户提供标签并且有多个样本的时候可以计算以下指标，主要用于评估模型的好坏，在这里自己可以进行判断，不需要放到前端
+# 计算准确率
 # accuracy = accuracy_score(label, predicted_labels)
 # print(f'Test Accuracy: {accuracy}')
 # # 计算精确度
@@ -293,20 +299,22 @@ print(f"Braak predicted results:{predicted_labels_Braak},CERAD predicted results
 # df = pd.DataFrame({'pred': predicted_labels})
 # df.to_csv('./Braak.csv',index=None,columns=None)
 
+
+print("Saving predicted results...", flush=True)
 df_Braak_1 = pd.DataFrame(predictions_Braak)
 df_Braak_1.to_csv(data_path + "Braak.csv", index=None, columns=None)
 df_CERAD = pd.DataFrame(predictions_CERAD)
 df_CERAD.to_csv(data_path + "CERAD.csv", index=None, columns=None)
 df_CogDx = pd.DataFrame(predictions_Cogdx)
 df_CogDx.to_csv(data_path + "CogDx.csv", index=None, columns=None)
-print("Predicted results saved.", flush=True)
 
 
 from sklearn.preprocessing import label_binarize
-from sklearn.metrics import roc_curve
+from sklearn.metrics import roc_curve, accuracy_score, precision_score, recall_score, f1_score
 import matplotlib.pyplot as plt
 from sklearn.metrics import auc
 
+print("Calculating ROC curve...", flush=True)
 methods = ["Braak","CERAD","CogDx"]
 # methods = ["Braak"]
 colors = ["#CBE99A","#FDB96A","#87CFA4"]
@@ -317,6 +325,7 @@ Braak = pd.read_csv(data_path + "Braak.csv")
 CERAD = pd.read_csv(data_path + "CERAD.csv")
 CogDx = pd.read_csv(data_path + "CogDx.csv")
 
+print("Loading true labels...", flush=True)
  ## 读取真实标签
 true = pd.read_csv(model_path + "label"+ test_code +".csv",header = 0,index_col=None)
 
@@ -334,13 +343,8 @@ true_labels_bin3 = label_binarize(true["Cogdx"].tolist(), classes=
 methods_labels = [method1_labels, method2_labels, method3_labels]
 
 true_labels = [true_labels_bin1, true_labels_bin2, true_labels_bin3]
-for i, (true_label, method_label) in enumerate(zip(true_labels, methods_labels)):
-    print(f"true_labels[{i}].shape: {true_label.shape}")
-    print(f"methods_labels[{i}].shape: {method_label.shape}")
-    print(f"true_labels[{i}]: {true_label}")
-    print(f"methods_labels[{i}]: {method_label}")
 
-
+print("Plotting ROC curve...", flush=True)
 for j, method_label in enumerate(methods_labels):
     fpr1, tpr1, _ = roc_curve(true_labels[j].ravel(), method_label.ravel())
     roc_auc = auc(fpr1, tpr1)
@@ -359,4 +363,5 @@ plt.ylabel('True Positive Rate')
 plt.legend(loc="lower right")
 plt.tight_layout()
 plt.savefig(data_path + 'ROC.png',dpi=750,bbox_inches='tight')
+print("ROC curve saved successfully", flush=True)
 

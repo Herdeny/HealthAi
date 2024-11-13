@@ -3,10 +3,12 @@ package com.github.herdeny.controller;
 import com.github.herdeny.pojo.Result;
 import com.github.herdeny.service.PredictedLabelsService;
 import jakarta.annotation.Resource;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  * 阶段预测 模块
@@ -30,8 +32,6 @@ public class PredictedLabelsController {
     @Value("${TEST_DATA_PATH}")
     private String TEST_DATA_PATH;
 
-    System.Logger logger = System.getLogger(PredictedLabelsController.class.getName());
-
     /**
      * 运行预测
      * 调用用户上传的 csv 文件进行预测
@@ -45,9 +45,12 @@ public class PredictedLabelsController {
      * }
      */
     @PostMapping("/run")
-    public Result<String> run(@RequestParam String fileName, String uid) {
-        String result = predictedLabelsService.predict(DATA_PATH + fileName, uid);
-        return Result.success(result);
+    public Result<Map<String, Object>> run(@RequestParam String fileName, String uid) {
+        JSONObject result = predictedLabelsService.predict(DATA_PATH + fileName, uid);
+        if (!result.getBoolean("success")) {
+            return Result.error(result.getInt("code"), "执行预测失败", result.toMap());
+        }
+        return Result.success(result.toMap());
     }
 
     /**

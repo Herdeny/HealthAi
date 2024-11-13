@@ -1,6 +1,8 @@
 package com.github.herdeny.service;
 
+import org.json.JSONObject;
+
 public interface ROC_Service {
-    String test(String test_code);
+    JSONObject test(String test_code, String uid);
 
 }

@@ -58,13 +58,14 @@ public class Report_ServiceImpl implements Report_Service {
             while ((errorStr = err.readLine()) != null) {
                 if (errorStr.contains("Error")) {
                     if (flag) flag = false;
-                    String regex = "\\[Errno (\\d+)]";
+                    String regex = "\\[(Errno|WinError)\\s+(\\d+)]";
                     Pattern pattern = Pattern.compile(regex);
                     Matcher matcher = pattern.matcher(errorStr);
                     if (matcher.find()) {
-                        result.put("Error code", matcher.group(1));
+                        result.put("code", matcher.group(2));
                     }
-                    result.put("Error Message", errorStr);
+                    result.put("data", errorStr);
+                    sseClient.sendMessage(uid, uid + "-error-create-report", "create report error");
                 }
                 System.err.println(errorStr);
             }
@@ -75,6 +76,10 @@ public class Report_ServiceImpl implements Report_Service {
             throw new RuntimeException(e);
         }
         result.put("success", flag);
+        if (flag) {
+            sseClient.sendMessage(uid, uid + "-complete-create-report", "Complete Create Report...");
+            result.put("code", 0);
+        }
         return result;
     }
 }

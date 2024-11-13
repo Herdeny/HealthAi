@@ -1,6 +1,8 @@
 package com.github.herdeny.service.impl;
 
 import com.github.herdeny.service.ROC_Service;
+import com.github.herdeny.utils.SseClient;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -8,10 +10,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class ROC_ServiceImpl implements ROC_Service {
 
+    private final SseClient sseClient;
     @Value("${PYTHON_PATH}")
     private String pythonPath;
 
@@ -24,14 +30,21 @@ public class ROC_ServiceImpl implements ROC_Service {
     @Value("${DATA_PATH}")
     private String dataPath;
 
-    @Override
-    public String test(String test_code) {
-        System.out.println("Start generate ROC...");
+    public ROC_ServiceImpl(SseClient sseClient) {
+        this.sseClient = sseClient;
+    }
 
+    @Override
+    public JSONObject test(String test_code, String uid) {
+        JSONObject[] result = new JSONObject[1];
+        result[0] = new JSONObject();
+        boolean[] flag = {true};
+
+        System.out.println("Start generate ROC...");
+        sseClient.sendMessage(uid, uid + "-start-create-roc", "Start generate ROC...");
         String[] args1 = new String[]{pythonPath, createROCPath, modelPath, dataPath, test_code};
 
         Process process = null;
-        StringBuilder outputBuilder = new StringBuilder(); // 用于存储Python输出结果
         try {
             process = Runtime.getRuntime().exec(args1);
 
@@ -42,10 +55,11 @@ public class ROC_ServiceImpl implements ROC_Service {
                     String line;
                     while ((line = in.readLine()) != null) {
                         System.out.println(line);
-                        if (line.contains("ms/step")){
+                        if (line.contains("s/step")) {
                             continue;
                         }
-                        outputBuilder.append(line);
+                        String MessageID = UUID.randomUUID().toString();
+                        sseClient.sendMessage(uid, uid + "-" + MessageID, line);
                     }
                 } catch (IOException e) {
                     System.err.println("Error reading process output: " + e.getMessage());
@@ -57,6 +71,17 @@ public class ROC_ServiceImpl implements ROC_Service {
                 try (BufferedReader err = new BufferedReader(new InputStreamReader(finalProcess1.getErrorStream(), StandardCharsets.UTF_8))) {
                     String errorStr;
                     while ((errorStr = err.readLine()) != null) {
+                        if (errorStr.contains("Error") && !errorStr.startsWith("WARNING")) {
+                            if (flag[0]) flag[0] = false;
+                            String regex = "\\[(Errno|WinError)\\s+(\\d+)]";
+                            Pattern pattern = Pattern.compile(regex);
+                            Matcher matcher = pattern.matcher(errorStr);
+                            if (matcher.find()) {
+                                result[0].put("code", matcher.group(2));
+                            }
+                            result[0].put("data", errorStr);
+                            sseClient.sendMessage(uid, uid + "-error-create-roc", "create roc error");
+                        }
                         System.err.println(errorStr);
                     }
                 } catch (IOException e) {
@@ -72,14 +97,12 @@ public class ROC_ServiceImpl implements ROC_Service {
             outputThread.join();
             errorThread.join();
 
+            result[0].put("success", flag[0]);
             if (exitCode == 0) {
+                result[0].put("code", 0);
                 System.out.println("Completed Generate ROC stages");
-                return outputBuilder.toString();
-            } else {
-                System.err.println("Process exited with code: " + exitCode);
-                // 可以根据需要返回不同的结果或抛出异常
-                return null;
             }
+            return result[0];
 
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("Error during prediction: " + e.getMessage(), e);
